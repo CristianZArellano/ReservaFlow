@@ -1,0 +1,40 @@
+# Entornos virtuales
+.venv/
+env/
+venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Base de datos local
+db.sqlite3
+
+# Configuración de entorno
+*.env
+.env.*
+
+# Logs
+*.log
+
+# Configuración de IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de pruebas
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+
+# uv (lock local, se puede regenerar)
+uv.lock
