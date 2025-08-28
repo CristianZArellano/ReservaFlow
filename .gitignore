@@ -40,3 +40,5 @@ htmlcov/
 uv.lock
 GEMINI.md
 CLAUDE.md
+
+/logs
