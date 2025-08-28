@@ -1,13 +1,6 @@
-#!/bin/bash
+# restart-python.sh - Para cambios en código
+docker compose restart web celery celery-beat
 
-# Detener y eliminar contenedores, redes y volúmenes anónimos
-echo "🛑 Apagando contenedores..."
-docker compose down
-
-# Reconstruir imágenes y levantar en segundo plano
-echo "🚀 Levantando contenedores con build..."
-docker compose up --build -d
-
-# Mostrar estado
-echo "📋 Estado de los contenedores:"
-docker compose ps
+# migrate.sh - Para cambios en modelos
+docker compose exec web uv run python manage.py makemigrations
+docker compose exec web uv run python manage.py migrate

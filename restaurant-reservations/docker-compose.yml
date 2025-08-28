@@ -19,6 +19,8 @@ services:
     build: .
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app  # Agregar esta línea
     depends_on:
       - db
       - redis
@@ -31,16 +33,20 @@ services:
 
   celery:
     build: .
+    volumes:
+      - .:/app  # Agregar esta línea
     depends_on:
       - db
       - redis
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
-    command: uv run celery -A config worker --loglevel=info
+    command: uv run celery -A config worker --loglevel=info --autoreload
 
   celery-beat:
     build: .
+    volumes:
+      - .:/app  # Agregar esta línea
     depends_on:
       - db
       - redis
