@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar archivos
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml ./
 COPY . .
 
 # Instalar uv y dependencias
@@ -17,4 +17,4 @@ RUN uv sync
 
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["uv", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]

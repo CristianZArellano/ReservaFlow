@@ -38,3 +38,5 @@ htmlcov/
 
 # uv (lock local, se puede regenerar)
 uv.lock
+GEMINI.md
+CLAUDE.md

@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+from decouple import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +22,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-!qz*%mt6g^2j5!qx7%302c710)#=ucde@8hh4(ke8(9*#e!f3r"
+SECRET_KEY = config(
+    "SECRET_KEY",
+    default="django-insecure-!qz*%mt6g^2j5!qx7%302c710)#=ucde@8hh4(ke8(9*#e!f3r",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1,0.0.0.0",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+)
 
 
 # Application definition
@@ -81,16 +90,26 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "restaurant_reservations",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "db",  # nombre del servicio en docker-compose
-        "PORT": "5432",  # puerto interno (no el externo)
+# Database configuration
+DATABASE_URL = config("DATABASE_URL", default=None)
+
+if DATABASE_URL:
+    # Parse DATABASE_URL for Docker/production
+    import dj_database_url
+
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+else:
+    # Fallback to individual settings for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME", default="restaurant_reservations"),
+            "USER": config("DB_USER", default="postgres"),
+            "PASSWORD": config("DB_PASSWORD", default="postgres"),
+            "HOST": config("DB_HOST", default="db"),
+            "PORT": config("DB_PORT", default="5432"),
+        }
     }
-}
 
 
 # Password validation
@@ -134,10 +153,17 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Redis and Celery Configuration
+REDIS_URL = config("REDIS_URL", default="redis://redis:6379/0")
+
 # Celery Configuration
-CELERY_BROKER_URL = "redis://redis:6379/0"
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+
+
+# Configuración de reservas
+RESERVATION_PENDING_TIMEOUT = 1  # 1 minuto para pruebas
