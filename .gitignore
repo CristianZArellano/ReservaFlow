@@ -42,3 +42,21 @@ GEMINI.md
 CLAUDE.md
 
 /logs
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos
+.venv/
+.env
+
+# Django
+db.sqlite3
+
+# Archivos de lock/cache
+*.lock
+.pytest_cache/
+.mypy_cache/
