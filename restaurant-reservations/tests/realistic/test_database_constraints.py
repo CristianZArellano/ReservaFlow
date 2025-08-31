@@ -205,7 +205,7 @@ class DatabaseConstraintRealisticTest(TransactionTestCase):
             table=TableFactory(restaurant=self.restaurant, number="T2"),
             reservation_date=self.test_date,
             reservation_time=datetime.strptime("20:00", "%H:%M").time(),
-            party_size=3,
+            party_size=2,
             status=Reservation.Status.PENDING
         )
         

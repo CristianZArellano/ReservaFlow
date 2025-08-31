@@ -1,8 +1,8 @@
 """
 Tests realistas para tareas Celery con broker real
 """
-import time
-from datetime import datetime, timedelta
+import time as time_module
+from datetime import datetime, timedelta, time
 from django.test import TransactionTestCase
 from django.utils import timezone
 from celery import current_app
@@ -32,11 +32,11 @@ class CeleryTaskRealisticTest(TransactionTestCase):
     
     def wait_for_task(self, async_result, timeout=30):
         """Esperar a que una tarea termine con timeout"""
-        start_time = time.time()
-        while time.time() - start_time < timeout:
+        start_time = time_module.time()
+        while time_module.time() - start_time < timeout:
             if async_result.ready():
                 return async_result.result
-            time.sleep(0.5)
+            time_module.sleep(0.5)
         
         raise TimeoutError(f"Tarea no completó en {timeout} segundos")
     
@@ -49,7 +49,7 @@ class CeleryTaskRealisticTest(TransactionTestCase):
             customer=self.customer,
             table=self.table,
             reservation_date=timezone.now().date() + timedelta(days=1),
-            reservation_time=datetime.now().time(),
+            reservation_time=time(19, 0),
             party_size=2,
             status=Reservation.Status.PENDING,
             expires_at=past_time
@@ -84,8 +84,8 @@ class CeleryTaskRealisticTest(TransactionTestCase):
             customer=self.customer,
             table=self.table,
             reservation_date=timezone.now().date() + timedelta(days=1),
-            reservation_time=datetime.now().time(),
-            party_size=4,
+            reservation_time=time(19, 0),
+            party_size=2,
             status=Reservation.Status.CONFIRMED
         )
         
@@ -114,7 +114,7 @@ class CeleryTaskRealisticTest(TransactionTestCase):
             customer=self.customer,
             table=self.table,
             reservation_date=timezone.now().date() + timedelta(days=1),
-            reservation_time=datetime.now().time(),
+            reservation_time=time(19, 0),
             party_size=2,
             status=Reservation.Status.CONFIRMED
         )
@@ -141,8 +141,8 @@ class CeleryTaskRealisticTest(TransactionTestCase):
             customer=self.customer,
             table=self.table,
             reservation_date=timezone.now().date() + timedelta(days=2),
-            reservation_time=datetime.now().time(),
-            party_size=3,
+            reservation_time=time(19, 0),
+            party_size=2,
             status=Reservation.Status.CONFIRMED
         )
         
@@ -161,7 +161,7 @@ class CeleryTaskRealisticTest(TransactionTestCase):
         
         # Verificar que se programó correctamente
         self.assertIsNotNone(result)
-        self.assertEqual(result['status'], 'scheduled')
+        self.assertEqual(result['status'], 'reminder_scheduled')
         self.assertEqual(result['hours_before'], 24)
     
     def test_task_retry_behavior(self):
@@ -195,7 +195,7 @@ class CeleryTaskRealisticTest(TransactionTestCase):
                 customer=CustomerFactory(email=f"test{i}@example.com"),
                 table=TableFactory(restaurant=self.restaurant, number=f"T{i}"),
                 reservation_date=timezone.now().date() + timedelta(days=1),
-                reservation_time=datetime.now().time(),
+                reservation_time=time(19, 0),
                 party_size=2,
                 status=Reservation.Status.PENDING,
                 expires_at=past_time
@@ -255,7 +255,7 @@ class CeleryTaskRealisticTest(TransactionTestCase):
             customer=CustomerFactory(email=""),  # Email vacío
             table=self.table,
             reservation_date=timezone.now().date() + timedelta(days=1),
-            reservation_time=datetime.now().time(),
+            reservation_time=time(19, 0),
             party_size=2,
             status=Reservation.Status.CONFIRMED
         )

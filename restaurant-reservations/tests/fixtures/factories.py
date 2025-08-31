@@ -20,7 +20,7 @@ class RestaurantFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: f"Restaurant {n}")
     description = factory.Faker('text', max_nb_chars=200)
     address = factory.Faker('address')
-    phone = factory.Faker('phone_number')
+    phone = factory.LazyAttribute(lambda _: f"+{random.randint(1,999)}-{random.randint(100,999)}-{random.randint(1000,9999)}")
     email = factory.Faker('email')
     opening_time = time(9, 0)
     closing_time = time(22, 0)
@@ -51,7 +51,7 @@ class CustomerFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
     email = factory.Faker('email')
-    phone = factory.Faker('phone_number')
+    phone = factory.LazyAttribute(lambda _: f"+{random.randint(1,999)}-{random.randint(100,999)}-{random.randint(1000,9999)}")
 
 
 class ReservationFactory(factory.django.DjangoModelFactory):
@@ -64,7 +64,9 @@ class ReservationFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerFactory)
     table = factory.SubFactory(TableFactory)
     reservation_date = factory.LazyFunction(lambda: timezone.now().date() + timedelta(days=1))
-    reservation_time = time(19, 0)
+    reservation_time = factory.Faker('random_element', elements=[
+        time(10, 0), time(12, 0), time(14, 0), time(16, 0), time(18, 0), time(19, 0), time(20, 0), time(21, 0)
+    ])
     party_size = factory.LazyAttribute(lambda obj: random.randint(1, obj.table.capacity))
     status = Reservation.Status.PENDING
     

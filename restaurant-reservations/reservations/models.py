@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import timedelta, time
+from datetime import time, timedelta
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -24,7 +24,7 @@ class Reservation(models.Model):
     # Relaciones
     restaurant = models.ForeignKey("restaurants.Restaurant", on_delete=models.CASCADE)
     customer = models.ForeignKey("customers.Customer", on_delete=models.CASCADE)
-    table = models.ForeignKey("restaurants.Table", on_delete=models.CASCADE)
+    table = models.ForeignKey("restaurants.Table", on_delete=models.PROTECT)
 
     # Info de la reserva
     reservation_date = models.DateField("Fecha")
@@ -47,14 +47,14 @@ class Reservation(models.Model):
         # Prevenir dobles reservas para la misma mesa en la misma fecha/hora
         constraints = [
             models.UniqueConstraint(
-                fields=['table', 'reservation_date', 'reservation_time'],
-                condition=models.Q(status__in=['pending', 'confirmed']),
-                name='unique_active_reservation_per_table_datetime'
+                fields=["table", "reservation_date", "reservation_time"],
+                condition=models.Q(status__in=["pending", "confirmed"]),
+                name="unique_active_reservation_per_table_datetime",
             )
         ]
         indexes = [
-            models.Index(fields=['table', 'reservation_date', 'reservation_time']),
-            models.Index(fields=['status', 'expires_at']),
+            models.Index(fields=["table", "reservation_date", "reservation_time"]),
+            models.Index(fields=["status", "expires_at"]),
         ]
 
     def __str__(self):
@@ -63,80 +63,89 @@ class Reservation(models.Model):
     def clean(self):
         """Validación personalizada del modelo"""
         super().clean()
-        
+
         # Validar que no haya conflicto de horarios
         if self.table and self.reservation_date and self.reservation_time:
             self._validate_no_double_booking()
-            
+
         # Validar fechas lógicas
         self._validate_dates()
-        
+
         # Validar party size
         self._validate_party_size()
-        
+
     def _validate_dates(self):
         """Validar que las fechas sean lógicas"""
-        from django.utils import timezone
-        
+
         # No permitir reservas en el pasado
         if self.reservation_date:
             today = timezone.now().date()
             if self.reservation_date < today:
-                raise ValidationError({
-                    'reservation_date': 'No se pueden hacer reservas en fechas pasadas.'
-                })
-            
+                raise ValidationError(
+                    {
+                        "reservation_date": "No se pueden hacer reservas en fechas pasadas."
+                    }
+                )
+
             # Límite de reservas futuras (ej: 90 días)
             max_future_date = today + timedelta(days=90)
             if self.reservation_date > max_future_date:
-                raise ValidationError({
-                    'reservation_date': 'No se pueden hacer reservas con más de 90 días de anticipación.'
-                })
-        
+                raise ValidationError(
+                    {
+                        "reservation_date": "No se pueden hacer reservas con más de 90 días de anticipación."
+                    }
+                )
+
         # Validar horarios de operación
         if self.reservation_time:
             opening_time = time(10, 0)  # 10:00 AM
             closing_time = time(22, 0)  # 10:00 PM
-            
+
             if not (opening_time <= self.reservation_time <= closing_time):
-                raise ValidationError({
-                    'reservation_time': f'Horario de reserva debe ser entre {opening_time} y {closing_time}.'
-                })
-    
+                raise ValidationError(
+                    {
+                        "reservation_time": f"Horario de reserva debe ser entre {opening_time} y {closing_time}."
+                    }
+                )
+
     def _validate_party_size(self):
         """Validar tamaño del grupo"""
         if self.party_size:
             if self.party_size < 1:
-                raise ValidationError({
-                    'party_size': 'El número de personas debe ser al menos 1.'
-                })
+                raise ValidationError(
+                    {"party_size": "El número de personas debe ser al menos 1."}
+                )
             if self.party_size > 12:  # Límite máximo
-                raise ValidationError({
-                    'party_size': 'El número máximo de personas por reserva es 12.'
-                })
-            
+                raise ValidationError(
+                    {"party_size": "El número máximo de personas por reserva es 12."}
+                )
+
             # Validar capacidad de la mesa
-            if self.table and hasattr(self.table, 'capacity'):
+            if self.table and hasattr(self.table, "capacity"):
                 if self.party_size > self.table.capacity:
-                    raise ValidationError({
-                        'party_size': f'La mesa {self.table.number} tiene capacidad para {self.table.capacity} personas.'
-                    })
-    
+                    raise ValidationError(
+                        {
+                            "party_size": f"La mesa {self.table.number} tiene capacidad para {self.table.capacity} personas."
+                        }
+                    )
+
     def _validate_no_double_booking(self):
         """Validar que no existe otra reserva activa para la misma mesa/fecha/hora"""
         conflicting_reservations = Reservation.objects.filter(
             table=self.table,
             reservation_date=self.reservation_date,
             reservation_time=self.reservation_time,
-            status__in=[self.Status.PENDING, self.Status.CONFIRMED]
+            status__in=[self.Status.PENDING, self.Status.CONFIRMED],
         ).exclude(pk=self.pk)
-        
+
         if conflicting_reservations.exists():
             reservation = conflicting_reservations.first()
-            raise ValidationError({
-                'table': f'La mesa {self.table.number} ya está reservada para {self.reservation_date} a las {self.reservation_time}. '
-                        f'Reserva existente: {reservation.id.hex[:8]}'
-            })
+            raise ValidationError(
+                {
+                    "table": f"La mesa {self.table.number} ya está reservada para {self.reservation_date} a las {self.reservation_time}. "
+                    f"Reserva existente: {reservation.id.hex[:8]}"
+                }
+            )
 
     def is_expired(self) -> bool:
         """Devuelve True si la reserva ya venció."""
@@ -178,7 +187,7 @@ class Reservation(models.Model):
 
         # Ejecutar validación completa
         self.full_clean()
-        
+
         super().save(*args, **kwargs)
 
         # Programar expiración después de guardar si está pendiente
@@ -202,8 +211,7 @@ class Reservation(models.Model):
     @property
     def reservation_datetime(self):
         """Datetime completo de la reserva"""
-        from django.utils import timezone as tz
 
-        return tz.datetime.combine(
+        return timezone.datetime.combine(
             self.reservation_date, self.reservation_time
-        ).replace(tzinfo=tz.get_current_timezone())
+        ).replace(tzinfo=timezone.get_current_timezone())

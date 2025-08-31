@@ -15,9 +15,7 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'test_password'),
         'HOST': os.getenv('POSTGRES_HOST', 'test-db'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'OPTIONS': {
-            'charset': 'utf8',
-        },
+        'OPTIONS': {},
         'TEST': {
             # Para tests, usar la misma DB (Docker maneja aislamiento)
             'NAME': os.getenv('POSTGRES_DB', 'reservaflow_test'),
@@ -154,10 +152,18 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = []
 
 # ================================
+# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS
+# ================================
+import os
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = []
+
+# ================================
 # CONFIGURACIÓN DE TIMEOUTS PARA TESTS REALISTAS
 # ================================
 # Timeouts más cortos para acelerar tests pero mantener realismo
-DATABASES['default']['OPTIONS']['timeout'] = 10
+# DATABASES['default']['OPTIONS']['timeout'] = 10  # Comentado - no válido para PostgreSQL
 
 # Redis connection timeout
 CACHES['default']['OPTIONS']['CONNECTION_POOL_KWARGS'] = {
