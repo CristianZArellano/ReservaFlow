@@ -7,7 +7,6 @@ from datetime import date, datetime, timedelta
 from django.test import TransactionTestCase
 from django.db import transaction, IntegrityError
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 from reservations.models import Reservation
 from tests.fixtures.factories import RestaurantFactory, TableFactory, CustomerFactory
@@ -160,7 +159,7 @@ class DatabaseConstraintRealisticTest(TransactionTestCase):
                 )
                 reservation.status = Reservation.Status.CONFIRMED
                 reservation.save()
-                print(f"🔄 Reserva modificada a CONFIRMED en thread")
+                print("🔄 Reserva modificada a CONFIRMED en thread")
                 time.sleep(0.2)  # Mantener transacción abierta
         
         # Iniciar thread que modificará la reserva

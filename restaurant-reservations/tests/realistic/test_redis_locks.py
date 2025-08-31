@@ -3,9 +3,8 @@ Tests realistas para locks distribuidos con Redis real
 """
 import threading
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from django.test import TestCase, TransactionTestCase
-from django.utils import timezone
 from django.db import transaction
 
 from restaurants.services import TableReservationLock, check_table_availability

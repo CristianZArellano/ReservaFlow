@@ -2,15 +2,11 @@
 Base test classes and utilities
 """
 from django.test import TestCase, TransactionTestCase
-from django.db import transaction
-from unittest.mock import patch
 
 from .factories import (
     RestaurantFactory, 
     TableFactory, 
-    CustomerFactory, 
-    ReservationFactory,
-    ConfirmedReservationFactory
+    CustomerFactory
 )
 
 

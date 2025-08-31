@@ -8,7 +8,7 @@ from django.utils import timezone
 from unittest.mock import patch
 
 from reservations.models import Reservation
-from reservations.tasks import expire_reservation, schedule_reminder
+from reservations.tasks import expire_reservation
 from tests.fixtures.factories import (
     RestaurantFactory,
     TableFactory,

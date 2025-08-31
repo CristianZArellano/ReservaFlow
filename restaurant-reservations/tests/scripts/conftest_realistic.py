@@ -1,13 +1,11 @@
 """
 Configuración de pytest para tests realistas con servicios Docker reales
 """
-import os
 import pytest
 import redis
 import time
 from celery import current_app
 from django.conf import settings
-from django.test import TransactionTestCase
 from django.core.management import call_command
 from django.db import connections
 

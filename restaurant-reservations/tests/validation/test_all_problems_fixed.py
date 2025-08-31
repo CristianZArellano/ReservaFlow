@@ -8,11 +8,10 @@ han sido corregidos y que el sistema es completamente robusto.
 """
 
 import os
-import sys
 import time
 import threading
 from datetime import datetime, date, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -409,7 +408,7 @@ class ComprehensiveProblemValidation:
             for thread in threads:
                 thread.join()
             
-            print(f"  📊 Resultados del flujo completo:")
+            print("  📊 Resultados del flujo completo:")
             for result in results:
                 print(f"     {result}")
             for error in errors:
@@ -429,9 +428,9 @@ class ComprehensiveProblemValidation:
             
             if integration_success:
                 self.passed_tests += 1
-                print(f"  ✅ Integración end-to-end robusta")
+                print("  ✅ Integración end-to-end robusta")
             else:
-                print(f"  ❌ Problemas de integración detectados")
+                print("  ❌ Problemas de integración detectados")
             
         except Exception as e:
             print(f"  ❌ Error en test de integración: {e}")
@@ -447,12 +446,12 @@ class ComprehensiveProblemValidation:
         
         success_rate = (self.passed_tests / self.total_tests) * 100 if self.total_tests > 0 else 0
         
-        print(f"\n📊 RESUMEN EJECUTIVO:")
+        print("\n📊 RESUMEN EJECUTIVO:")
         print(f"  Total de categorías validadas: {self.total_tests}")
         print(f"  Categorías exitosas: {self.passed_tests}")
         print(f"  Porcentaje de éxito: {success_rate:.1f}%")
         
-        print(f"\n🔍 DETALLE POR CATEGORÍA:")
+        print("\n🔍 DETALLE POR CATEGORÍA:")
         
         categories = {
             'database_config': 'Configuración robusta de base de datos',
@@ -469,7 +468,7 @@ class ComprehensiveProblemValidation:
                 status = "✅ CORREGIDO" if self.results[key] else "❌ PENDIENTE"
                 print(f"  {description:35} {status}")
         
-        print(f"\n💡 PROBLEMAS CORREGIDOS:")
+        print("\n💡 PROBLEMAS CORREGIDOS:")
         improvements = [
             "✅ Fallback automático SQLite ↔ PostgreSQL",
             "✅ Locks Redis con retry y scripts Lua", 
@@ -488,17 +487,17 @@ class ComprehensiveProblemValidation:
         for improvement in improvements:
             print(f"  {improvement}")
         
-        print(f"\n🏆 CONCLUSIÓN:")
+        print("\n🏆 CONCLUSIÓN:")
         if success_rate >= 85:
-            print(f"  ✅ SISTEMA COMPLETAMENTE ROBUSTO")
-            print(f"  📈 Todos los problemas principales han sido corregidos")
-            print(f"  🚀 ReservaFlow está listo para producción")
+            print("  ✅ SISTEMA COMPLETAMENTE ROBUSTO")
+            print("  📈 Todos los problemas principales han sido corregidos")
+            print("  🚀 ReservaFlow está listo para producción")
         elif success_rate >= 70:
-            print(f"  ⚠️ SISTEMA MAYORMENTE ROBUSTO") 
-            print(f"  🔧 Algunos ajustes menores pueden ser necesarios")
+            print("  ⚠️ SISTEMA MAYORMENTE ROBUSTO") 
+            print("  🔧 Algunos ajustes menores pueden ser necesarios")
         else:
-            print(f"  ❌ SISTEMA REQUIERE MÁS TRABAJO")
-            print(f"  🔧 Problemas críticos aún pendientes")
+            print("  ❌ SISTEMA REQUIERE MÁS TRABAJO")
+            print("  🔧 Problemas críticos aún pendientes")
         
         return success_rate >= 85
 
@@ -524,7 +523,7 @@ def main():
     # Generar reporte final
     all_fixed = validator.generate_final_validation_report()
     
-    print(f"\n🎉 VALIDACIÓN COMPLETADA!")
+    print("\n🎉 VALIDACIÓN COMPLETADA!")
     if all_fixed:
         print("   ✅ Todos los problemas han sido corregidos exitosamente")
         print("   🚀 ReservaFlow está completamente robusto para producción")

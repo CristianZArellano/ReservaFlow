@@ -11,7 +11,7 @@ sys.path.append('/home/mackroph/Projects/django/ReservaFlow/restaurant-reservati
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from datetime import date, time, timedelta
+from datetime import time, timedelta
 from django.utils import timezone
 
 from restaurants.models import Restaurant, Table
@@ -65,7 +65,7 @@ def test_full_reservation_flow():
         print(f"   Expira: {reservation.expires_at}")
         
         # Cambiar a confirmada (debe programar recordatorio)
-        print(f"\n✉️ Confirmando reserva (debe programar recordatorio)...")
+        print("\n✉️ Confirmando reserva (debe programar recordatorio)...")
         reservation.status = Reservation.Status.CONFIRMED
         reservation.save()
         

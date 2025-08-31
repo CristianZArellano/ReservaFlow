@@ -131,12 +131,12 @@ def generate_test_report(results):
     passed_categories = sum(1 for success in results.values() if success)
     success_rate = (passed_categories / total_categories) * 100 if total_categories > 0 else 0
     
-    print(f"\n📈 RESUMEN EJECUTIVO:")
+    print("\n📈 RESUMEN EJECUTIVO:")
     print(f"   Total de categorías: {total_categories}")
     print(f"   Categorías exitosas: {passed_categories}")
     print(f"   Tasa de éxito: {success_rate:.1f}%")
     
-    print(f"\n📋 DETALLE POR CATEGORÍA:")
+    print("\n📋 DETALLE POR CATEGORÍA:")
     
     category_names = {
         'unit': 'Tests Unitarios',
@@ -151,28 +151,28 @@ def generate_test_report(results):
         status = "✅ PASÓ" if success else "❌ FALLÓ"
         print(f"   {name:25} {status}")
     
-    print(f"\n💡 ESTRUCTURA DE TESTS ORGANIZADA:")
-    print(f"   📁 tests/unit/           - Tests unitarios de modelos, vistas, tareas")
-    print(f"   📁 tests/integration/    - Tests de integración API y flujos") 
-    print(f"   📁 tests/realistic/      - Tests con servicios reales (Redis, BD)")
-    print(f"   📁 tests/validation/     - Tests de validación específicos")
-    print(f"   📁 tests/scripts/        - Scripts de demostración y herramientas")
-    print(f"   📁 tests/fixtures/       - Factories y fixtures compartidos")
-    print(f"   📁 docs/                 - Documentación técnica")
+    print("\n💡 ESTRUCTURA DE TESTS ORGANIZADA:")
+    print("   📁 tests/unit/           - Tests unitarios de modelos, vistas, tareas")
+    print("   📁 tests/integration/    - Tests de integración API y flujos") 
+    print("   📁 tests/realistic/      - Tests con servicios reales (Redis, BD)")
+    print("   📁 tests/validation/     - Tests de validación específicos")
+    print("   📁 tests/scripts/        - Scripts de demostración y herramientas")
+    print("   📁 tests/fixtures/       - Factories y fixtures compartidos")
+    print("   📁 docs/                 - Documentación técnica")
     
     if success_rate >= 80:
-        print(f"\n🏆 CONCLUSIÓN:")
-        print(f"   ✅ SISTEMA DE TESTS ROBUSTO Y ORGANIZADO")
-        print(f"   📚 Todos los tipos de tests están funcionando correctamente")
-        print(f"   🚀 ReservaFlow tiene cobertura completa de testing")
+        print("\n🏆 CONCLUSIÓN:")
+        print("   ✅ SISTEMA DE TESTS ROBUSTO Y ORGANIZADO")
+        print("   📚 Todos los tipos de tests están funcionando correctamente")
+        print("   🚀 ReservaFlow tiene cobertura completa de testing")
     elif success_rate >= 60:
-        print(f"\n⚠️ CONCLUSIÓN:")
-        print(f"   🔧 SISTEMA DE TESTS MAYORMENTE FUNCIONAL")
-        print(f"   📝 Algunas categorías necesitan ajustes menores")
+        print("\n⚠️ CONCLUSIÓN:")
+        print("   🔧 SISTEMA DE TESTS MAYORMENTE FUNCIONAL")
+        print("   📝 Algunas categorías necesitan ajustes menores")
     else:
-        print(f"\n❌ CONCLUSIÓN:")
-        print(f"   🚨 SISTEMA DE TESTS REQUIERE ATENCIÓN")
-        print(f"   🔧 Problemas críticos en múltiples categorías")
+        print("\n❌ CONCLUSIÓN:")
+        print("   🚨 SISTEMA DE TESTS REQUIERE ATENCIÓN")
+        print("   🔧 Problemas críticos en múltiples categorías")
     
     return success_rate >= 80
 
@@ -210,7 +210,7 @@ def main():
     # Generar reporte final
     overall_success = generate_test_report(results)
     
-    print(f"\n🎉 EJECUCIÓN COMPLETADA!")
+    print("\n🎉 EJECUCIÓN COMPLETADA!")
     if overall_success:
         print("   ✅ Todos los tests están organizados y funcionando")
         sys.exit(0)

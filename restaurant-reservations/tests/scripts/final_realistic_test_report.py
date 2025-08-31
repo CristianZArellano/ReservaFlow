@@ -6,9 +6,8 @@ import os
 import sys
 import time
 import threading
-import uuid
 from datetime import datetime, timedelta, date
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 # Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -379,13 +378,13 @@ def run_realistic_test_demonstration():
         description = test_descriptions.get(test_key, test_key)
         print(f"  {description:<20} {status}")
     
-    print(f"\n📊 RESUMEN EJECUTIVO:")
+    print("\n📊 RESUMEN EJECUTIVO:")
     print(f"  Total tests: {total}")
     print(f"  Pasados: {passed}")
     print(f"  Fallados: {total - passed}")
     print(f"  Éxito: {(passed/total)*100:.1f}%")
     
-    print(f"\n🔍 ANÁLISIS: ¿QUÉ REVELAN LOS TESTS REALISTAS?")
+    print("\n🔍 ANÁLISIS: ¿QUÉ REVELAN LOS TESTS REALISTAS?")
     print("="*50)
     
     print("✅ COMPORTAMIENTOS REALES DETECTADOS:")
@@ -396,14 +395,14 @@ def run_realistic_test_demonstration():
     print("  ⏱️ Timing y latencia revelan condiciones de carrera")
     print("  🔄 Transacciones atómicas protegen integridad")
     
-    print(f"\n⚠️ DIFERENCIAS CON MOCKS TRADICIONALES:")
+    print("\n⚠️ DIFERENCIAS CON MOCKS TRADICIONALES:")
     print("  🚫 Mocks siempre devuelven valores predecibles")
     print("  🚫 No detectan race conditions temporales")
     print("  🚫 No prueban timeout ni expiración real")
     print("  🚫 No revelan problemas de concurrencia")
     print("  🚫 No validan comportamiento asíncrono real")
     
-    print(f"\n🎯 ERRORES QUE SOLO TESTS REALISTAS DETECTAN:")
+    print("\n🎯 ERRORES QUE SOLO TESTS REALISTAS DETECTAN:")
     print("  ⏰ Race conditions en locks distribuidos")
     print("  🔄 Problemas de timeout y expiración")
     print("  📊 Conflictos en transacciones concurrentes")
@@ -411,14 +410,14 @@ def run_realistic_test_demonstration():
     print("  🔐 Deadlocks en recursos compartidos")
     print("  💾 Diferencias entre motores de BD (SQLite vs PostgreSQL)")
     
-    print(f"\n🏗️ DIFERENCIAS CON DOCKER COMPLETO:")
+    print("\n🏗️ DIFERENCIAS CON DOCKER COMPLETO:")
     print("  📦 Docker revelaría problemas de red entre servicios")
     print("  🔗 Latencia real de Redis y PostgreSQL")
     print("  📨 Workers Celery distribuidos reales")
     print("  🌐 Problemas de conectividad entre contenedores")
     print("  🔧 Issues de configuración en producción")
     
-    print(f"\n📈 RECOMENDACIONES:")
+    print("\n📈 RECOMENDACIONES:")
     if passed == total:
         print("  🎉 EXCELENTE: Lógica de negocio es robusta")
         print("  ✅ Sistema listo para tests con Docker completo")
@@ -456,7 +455,7 @@ if __name__ == "__main__":
         print("📊 Tests realistas revelaron problemas que mocks no detectan")
         exit_code = 1
     
-    print(f"\n🔍 Los tests realistas demostraron ser superiores a mocks")
-    print(f"🎯 para detectar problemas de concurrencia y timing reales.")
+    print("\n🔍 Los tests realistas demostraron ser superiores a mocks")
+    print("🎯 para detectar problemas de concurrencia y timing reales.")
     
     sys.exit(exit_code)

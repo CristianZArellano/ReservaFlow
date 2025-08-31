@@ -5,20 +5,20 @@ import os
 from .settings import *
 
 # ================================
-# CONFIGURACIÓN DE BASE DE DATOS REAL
+# CONFIGURACIÓN DE BASE DE DATOS TEMPORAL PARA TESTS
 # ================================
+# Django creará automáticamente una BD de test y la destruirá al final
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'reservaflow_test'),
-        'USER': os.getenv('POSTGRES_USER', 'test_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'test_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'test-db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'NAME': 'restaurant_reservations',  # BD base para crear test_*
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',  # Usa el servicio PostgreSQL del docker-compose unificado
+        'PORT': '5432',
         'OPTIONS': {},
         'TEST': {
-            # Para tests, usar la misma DB (Docker maneja aislamiento)
-            'NAME': os.getenv('POSTGRES_DB', 'reservaflow_test'),
+            'NAME': 'test_restaurant_reservations_realistic',  # BD temporal
         }
     }
 }
@@ -26,14 +26,15 @@ DATABASES = {
 # ================================
 # REDIS REAL PARA LOCKS Y CACHE
 # ================================
-REDIS_URL = os.getenv('REDIS_URL', 'redis://test-redis:6379/0')
+REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')  # Usa Redis del docker-compose unificado
 
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': REDIS_URL,
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # Usar el backend nativo de Django (compatible con redis-py 5.x)
+            'db': 0,
         },
         'TIMEOUT': 300,  # 5 minutos default
     }
@@ -42,8 +43,8 @@ CACHES = {
 # ================================
 # CELERY REAL (NO EAGER MODE)
 # ================================
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://test-redis:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://test-redis:6379/0')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')  # Usa Redis del docker-compose unificado
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 
 # CRÍTICO: NO usar EAGER mode - queremos comportamiento real
 CELERY_TASK_ALWAYS_EAGER = False
@@ -165,11 +166,7 @@ STATICFILES_DIRS = []
 # Timeouts más cortos para acelerar tests pero mantener realismo
 # DATABASES['default']['OPTIONS']['timeout'] = 10  # Comentado - no válido para PostgreSQL
 
-# Redis connection timeout
-CACHES['default']['OPTIONS']['CONNECTION_POOL_KWARGS'] = {
-    'socket_timeout': 5,
-    'socket_connect_timeout': 5,
-}
+# Redis connection timeout no es necesario con el backend nativo de Django
 
 print("🧪 CONFIGURACIÓN DE TESTS REALISTAS CARGADA")
 print(f"📊 Database: {DATABASES['default']['NAME']} @ {DATABASES['default']['HOST']}")

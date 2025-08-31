@@ -11,7 +11,6 @@ import time
 import threading
 import random
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
 
 class RealisticTestDemonstration:
     """Demostración de tests realistas sin dependencias externas"""
@@ -269,7 +268,7 @@ class RealisticTestDemonstration:
         success_count = sum(1 for task_id, _ in tasks if self.celery_tasks[task_id]['status'] == 'SUCCESS')
         failure_count = len(tasks) - success_count
         
-        print(f"\n  📊 Resultados realistas:")
+        print("\n  📊 Resultados realistas:")
         print(f"     ✅ Exitosas: {success_count}/{len(tasks)} ({success_count/len(tasks):.1%})")
         print(f"     ❌ Fallidas: {failure_count}/{len(tasks)} ({failure_count/len(tasks):.1%})")
         
@@ -307,7 +306,7 @@ class RealisticTestDemonstration:
                 # Simular verificación de constraint único
                 if key in table_reservations:
                     # Simular IntegrityError de PostgreSQL
-                    raise Exception(f"IntegrityError: duplicate key violates unique constraint")
+                    raise Exception("IntegrityError: duplicate key violates unique constraint")
                 
                 # Simular INSERT
                 table_reservations[key] = {
@@ -570,7 +569,7 @@ class RealisticTestDemonstration:
             for step in steps:
                 print(f"     {step}")
         
-        print(f"\n  📊 Estadísticas de Integración Realista:")
+        print("\n  📊 Estadísticas de Integración Realista:")
         print(f"     ✅ Reservas exitosas: {successful_reservations}/{num_customers}")
         print(f"     🔒 Fallos de lock: {lock_failures}/{num_customers}")
         print(f"     💾 Fallos de DB: {db_failures}/{num_customers}")
@@ -615,48 +614,48 @@ class RealisticTestDemonstration:
         total_tests = len(self.results)
         realistic_passed = sum(1 for result in self.results.values() if result['realistic'])
         
-        print(f"\n🎯 RESUMEN DE RESULTADOS:")
+        print("\n🎯 RESUMEN DE RESULTADOS:")
         print(f"  Total de escenarios probados: {total_tests}")
         print(f"  Tests realistas exitosos: {realistic_passed}/{total_tests}")
         print(f"  Porcentaje de éxito: {(realistic_passed/total_tests)*100:.1f}%")
         
-        print(f"\n🔍 ANÁLISIS DETALLADO:")
+        print("\n🔍 ANÁLISIS DETALLADO:")
         
         for test_name, data in self.results.items():
             print(f"\n  📋 {test_name.replace('_', ' ').title()}:")
             status = "✅ PASÓ" if data['realistic'] else "⚠️ DETECTÓ PROBLEMAS"
             print(f"     Comportamiento realista: {status}")
-            print(f"     Problemas que los mocks NO detectan:")
+            print("     Problemas que los mocks NO detectan:")
             for issue in data['mock_issues']:
                 print(f"       • {issue}")
         
-        print(f"\n💡 CONCLUSIONES:")
-        print(f"  🔴 Redis Real vs Mock:")
-        print(f"     • Tests realistas detectan condiciones de carrera")
-        print(f"     • Mocks no simulan timeouts ni contención")
-        print(f"     • Lock distribuido requiere timing real")
+        print("\n💡 CONCLUSIONES:")
+        print("  🔴 Redis Real vs Mock:")
+        print("     • Tests realistas detectan condiciones de carrera")
+        print("     • Mocks no simulan timeouts ni contención")
+        print("     • Lock distribuido requiere timing real")
         
-        print(f"\n  📨 Celery Real vs Eager Mode:")
-        print(f"     • Ejecución asíncrona revela problemas de timing")
-        print(f"     • Fallos de red y broker son detectados")
-        print(f"     • Modo síncrono oculta problemas de producción")
+        print("\n  📨 Celery Real vs Eager Mode:")
+        print("     • Ejecución asíncrona revela problemas de timing")
+        print("     • Fallos de red y broker son detectados")
+        print("     • Modo síncrono oculta problemas de producción")
         
-        print(f"\n  💾 Database Real vs Mock:")
-        print(f"     • Constraints únicos funcionan correctamente")
-        print(f"     • Transacciones y rollbacks se comportan realistamente")
-        print(f"     • Mocks permiten estados inconsistentes")
+        print("\n  💾 Database Real vs Mock:")
+        print("     • Constraints únicos funcionan correctamente")
+        print("     • Transacciones y rollbacks se comportan realistamente")
+        print("     • Mocks permiten estados inconsistentes")
         
-        print(f"\n  🔄 Integración End-to-End:")
-        print(f"     • Fallos en cascada se propagan correctamente")
-        print(f"     • Cleanup y rollback funcionan como esperado")
-        print(f"     • Tests de componentes aislados pierden contexto real")
+        print("\n  🔄 Integración End-to-End:")
+        print("     • Fallos en cascada se propagan correctamente")
+        print("     • Cleanup y rollback funcionan como esperado")
+        print("     • Tests de componentes aislados pierden contexto real")
         
-        print(f"\n🏆 RECOMENDACIONES:")
-        print(f"  1. Usar Docker con servicios reales para tests de integración")
-        print(f"  2. Configurar Celery en modo NO-eager para tests realistas")
-        print(f"  3. Usar PostgreSQL real (no SQLite) para constraint testing")
-        print(f"  4. Implementar tests de chaos engineering")
-        print(f"  5. Monitorear métricas reales en tests (latencia, throughput)")
+        print("\n🏆 RECOMENDACIONES:")
+        print("  1. Usar Docker con servicios reales para tests de integración")
+        print("  2. Configurar Celery en modo NO-eager para tests realistas")
+        print("  3. Usar PostgreSQL real (no SQLite) para constraint testing")
+        print("  4. Implementar tests de chaos engineering")
+        print("  5. Monitorear métricas reales en tests (latencia, throughput)")
         
         return realistic_passed, total_tests
 
@@ -683,7 +682,7 @@ def main():
     # Generar reporte final
     passed, total = demo.generate_final_report()
     
-    print(f"\n🎉 DEMOSTRACIÓN COMPLETADA!")
+    print("\n🎉 DEMOSTRACIÓN COMPLETADA!")
     print(f"   Comportamientos realistas detectados: {passed}/{total}")
     print(f"   Los mocks tradicionales habrían dado {total}/{total} falsos positivos")
     

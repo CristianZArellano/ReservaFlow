@@ -8,8 +8,8 @@ import time
 import threading
 import uuid
 from datetime import datetime, timedelta, date
-from unittest.mock import Mock, patch, MagicMock
-from django.test import TestCase, TransactionTestCase, override_settings
+from unittest.mock import patch
+from django.test import override_settings
 from django.db import transaction, IntegrityError
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -41,7 +41,6 @@ with override_settings(**TEST_SETTINGS):
     
     from reservations.models import Reservation
     from reservations.tasks import expire_reservation, send_confirmation_email
-    from restaurants.services import TableReservationLock, check_table_availability
     from tests.fixtures.factories import RestaurantFactory, TableFactory, CustomerFactory
 
 
@@ -433,9 +432,9 @@ class RealisticDatabaseConstraintTests(RealisticTestRunner):
         # En SQLite puede no enforcer constraints complejos como PostgreSQL
         if constraint_violated:
             success = count == 1
-            print(f"  ✅ Constraint enforced correctamente")
+            print("  ✅ Constraint enforced correctamente")
         else:
-            print(f"  ⚠️ SQLite permite duplicados - diferencia con PostgreSQL real")
+            print("  ⚠️ SQLite permite duplicados - diferencia con PostgreSQL real")
             success = True  # Comportamiento esperado en SQLite
         
         print(f"  {'✅' if success else '❌'} Test constraint: {success}")
@@ -577,14 +576,14 @@ def run_complete_realistic_tests():
         status = "✅ PASÓ" if passed_test else "❌ FALLÓ"
         print(f"  {test_name:<25} {status}")
     
-    print(f"\n📊 RESUMEN:")
+    print("\n📊 RESUMEN:")
     print(f"  Total de tests: {total}")
     print(f"  Tests pasados: {passed}")
     print(f"  Tests fallidos: {total - passed}")
     print(f"  Porcentaje éxito: {(passed/total)*100:.1f}%")
     
     # Análisis de realismo vs mocks
-    print(f"\n🔍 ANÁLISIS: REALISMO vs MOCKS TRADICIONALES")
+    print("\n🔍 ANÁLISIS: REALISMO vs MOCKS TRADICIONALES")
     print("=" * 50)
     
     print("✅ VENTAJAS DE TESTS REALISTAS:")

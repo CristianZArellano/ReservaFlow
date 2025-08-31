@@ -3,7 +3,7 @@ Test factories for creating test data
 """
 import factory
 import random
-from datetime import date, time, datetime, timedelta
+from datetime import time, timedelta
 from django.utils import timezone
 
 from restaurants.models import Restaurant, Table

@@ -9,14 +9,11 @@ logger = logging.getLogger(__name__)
 
 # Cliente de Redis con configuración robusta
 def get_redis_client():
-    """Obtener cliente Redis con manejo de errores"""
+    """Obtener cliente Redis con manejo de errores (compatible redis-py 5.x)"""
     try:
         client = redis.from_url(
             settings.REDIS_URL or "redis://localhost:6379/0",
-            socket_timeout=5,  # Timeout de socket
-            socket_connect_timeout=5,  # Timeout de conexión  
-            retry_on_timeout=True,
-            health_check_interval=30
+            decode_responses=False
         )
         # Test de conexión
         client.ping()
@@ -167,7 +164,7 @@ class TableReservationLock:
         if self.lock_acquired:
             try:
                 self.release()
-            except:
+            except Exception:
                 pass
 
 
@@ -189,7 +186,6 @@ def check_table_availability(table_id, date, time_slot, use_cache=True):
 
     # Si no está en cache, verificar en base de datos
     from reservations.models import Reservation
-    from django.db import connection
 
     try:
         # Usar query optimizada con índice

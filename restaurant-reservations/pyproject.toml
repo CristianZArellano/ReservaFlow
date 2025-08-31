@@ -38,3 +38,8 @@ markers = [
     "integration: Integration tests", 
     "slow: Slow running tests",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.11",
+]

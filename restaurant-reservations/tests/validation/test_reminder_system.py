@@ -11,7 +11,7 @@ sys.path.append('/home/mackroph/Projects/django/ReservaFlow/restaurant-reservati
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from datetime import date, time, datetime, timedelta
+from datetime import time, timedelta
 from django.utils import timezone
 
 from restaurants.models import Restaurant, Table

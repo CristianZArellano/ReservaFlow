@@ -4,11 +4,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.core.cache import cache
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from restaurants.services import TableReservationLock, LockAcquisitionError, check_table_availability
+from restaurants.services import TableReservationLock, LockAcquisitionError
 
 from .models import Reservation
 from .tasks import send_confirmation_email, expire_reservation

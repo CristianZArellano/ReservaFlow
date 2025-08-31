@@ -2,11 +2,10 @@
 Tests realistas para tareas Celery con broker real
 """
 import time as time_module
-from datetime import datetime, timedelta, time
+from datetime import timedelta, time
 from django.test import TransactionTestCase
 from django.utils import timezone
 from celery import current_app
-from celery.result import AsyncResult
 
 from reservations.models import Reservation
 from reservations.tasks import (

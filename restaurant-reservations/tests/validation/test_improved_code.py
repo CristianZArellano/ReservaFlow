@@ -9,11 +9,10 @@ adversas que expusieron los tests realistas.
 """
 
 import os
-import sys
 import time
 import threading
 from datetime import datetime, date
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from django.db import transaction
 
 # Configurar Django
@@ -23,7 +22,7 @@ django.setup()
 
 from restaurants.services import TableReservationLock, LockAcquisitionError, get_connection_health
 from reservations.models import Reservation
-from reservations.tasks import send_confirmation_email, expire_reservation
+from reservations.tasks import send_confirmation_email
 from tests.fixtures.factories import RestaurantFactory, TableFactory, CustomerFactory
 
 
@@ -103,7 +102,7 @@ class ImprovedCodeTest:
         failed_locks = len(errors)
         avg_acquisition_time = sum(lock_acquisition_times) / len(lock_acquisition_times) if lock_acquisition_times else 0
         
-        print(f"  📊 Resultados de locks mejorados:")
+        print("  📊 Resultados de locks mejorados:")
         print(f"     ✅ Exitosos: {successful_locks}/10")
         print(f"     ❌ Fallidos: {failed_locks}/10") 
         print(f"     ⏱️ Tiempo promedio de adquisición: {avg_acquisition_time*1000:.1f}ms")
@@ -193,11 +192,11 @@ class ImprovedCodeTest:
             except Exception as e:
                 print(f"     Error: {type(e).__name__}")
         
-        print(f"  🔧 Mejoras en Celery implementadas:")
-        print(f"     • Retry diferenciado por tipo de error")
-        print(f"     • Timeout específico para SMTP")
-        print(f"     • Manejo de errores no recuperables")
-        print(f"     • Backoff exponencial con límites")
+        print("  🔧 Mejoras en Celery implementadas:")
+        print("     • Retry diferenciado por tipo de error")
+        print("     • Timeout específico para SMTP")
+        print("     • Manejo de errores no recuperables")
+        print("     • Backoff exponencial con límites")
         
         self.results['improved_celery'] = {
             'success': True,
@@ -299,7 +298,7 @@ class ImprovedCodeTest:
             
             final_queries = len(connection.queries)
             
-        print(f"  📊 Resultados de concurrencia:")
+        print("  📊 Resultados de concurrencia:")
         for result in results:
             print(f"     {result}")
         
@@ -338,12 +337,12 @@ class ImprovedCodeTest:
         total_tests = len(self.results)
         successful_improvements = sum(1 for r in self.results.values() if r['success'])
         
-        print(f"\n📊 RESUMEN DE MEJORAS:")
+        print("\n📊 RESUMEN DE MEJORAS:")
         print(f"  Total de áreas mejoradas: {total_tests}")
         print(f"  Mejoras exitosas: {successful_improvements}/{total_tests}")
         print(f"  Porcentaje de éxito: {(successful_improvements/total_tests)*100:.1f}%")
         
-        print(f"\n🔍 DETALLE DE MEJORAS:")
+        print("\n🔍 DETALLE DE MEJORAS:")
         
         for test_name, data in self.results.items():
             print(f"\n  📋 {test_name.replace('_', ' ').title()}:")
@@ -351,44 +350,44 @@ class ImprovedCodeTest:
             print(f"     Estado: {status}")
             
             if 'improvements' in data:
-                print(f"     Mejoras implementadas:")
+                print("     Mejoras implementadas:")
                 for improvement in data['improvements']:
                     print(f"       • {improvement}")
         
-        print(f"\n💡 IMPACTO DE LAS MEJORAS:")
-        print(f"  🔴 Redis Locks:")
+        print("\n💡 IMPACTO DE LAS MEJORAS:")
+        print("  🔴 Redis Locks:")
         if 'improved_locks' in self.results:
             locks_data = self.results['improved_locks']
             print(f"     • Locks exitosos: {locks_data['successful_locks']}/10 clientes")
             print(f"     • Tiempo promedio: {locks_data['avg_acquisition_time']*1000:.1f}ms")
-            print(f"     • Retry automático funcionando")
+            print("     • Retry automático funcionando")
         
-        print(f"\n  📨 Celery Tasks:")
-        print(f"     • Retry inteligente por tipo de error")
-        print(f"     • Timeout SMTP configurado (30s)")
-        print(f"     • Manejo de errores no recuperables")
+        print("\n  📨 Celery Tasks:")
+        print("     • Retry inteligente por tipo de error")
+        print("     • Timeout SMTP configurado (30s)")
+        print("     • Manejo de errores no recuperables")
         
-        print(f"\n  🏥 Health Monitoring:")
+        print("\n  🏥 Health Monitoring:")
         if 'health_monitoring' in self.results:
             health_data = self.results['health_monitoring']
             print(f"     • Health Score: {health_data['health_score']}%")
             print(f"     • Redis: {'✅' if health_data['redis_available'] else '❌'}")
             print(f"     • Database: {'✅' if health_data['database_available'] else '❌'}")
         
-        print(f"\n  💾 Database:")
+        print("\n  💾 Database:")
         if 'db_optimizations' in self.results:
             db_data = self.results['db_optimizations']
-            print(f"     • Constraint enforcement: ✅")
-            print(f"     • Row locking: ✅") 
-            print(f"     • Query optimization: ✅")
+            print("     • Constraint enforcement: ✅")
+            print("     • Row locking: ✅") 
+            print("     • Query optimization: ✅")
         
-        print(f"\n🏆 CONCLUSIONES:")
-        print(f"  Las mejoras implementadas hacen que ReservaFlow sea:")
-        print(f"  ✅ Más robusto ante fallos de red")
-        print(f"  ✅ Mejor manejo de concurrencia")
-        print(f"  ✅ Retry inteligente en tareas asíncronas")
-        print(f"  ✅ Monitoreo de salud de servicios")
-        print(f"  ✅ Optimizaciones de queries de BD")
+        print("\n🏆 CONCLUSIONES:")
+        print("  Las mejoras implementadas hacen que ReservaFlow sea:")
+        print("  ✅ Más robusto ante fallos de red")
+        print("  ✅ Mejor manejo de concurrencia")
+        print("  ✅ Retry inteligente en tareas asíncronas")
+        print("  ✅ Monitoreo de salud de servicios")
+        print("  ✅ Optimizaciones de queries de BD")
         
         return successful_improvements == total_tests
 
@@ -411,7 +410,7 @@ def main():
     # Generar reporte final
     all_improvements_successful = test.generate_improvement_report()
     
-    print(f"\n🎉 TESTING COMPLETADO!")
+    print("\n🎉 TESTING COMPLETADO!")
     if all_improvements_successful:
         print("   Todas las mejoras están funcionando correctamente")
         print("   El código ahora maneja mejor las condiciones adversas")

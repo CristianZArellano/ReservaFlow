@@ -2,7 +2,6 @@
 """
 Test runner script for ReservaFlow
 """
-import os
 import sys
 import subprocess
 

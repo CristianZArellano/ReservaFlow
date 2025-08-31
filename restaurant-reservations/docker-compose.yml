@@ -1,6 +1,7 @@
 services:
+  # Base de datos PostgreSQL para desarrollo
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     environment:
       POSTGRES_DB: restaurant_reservations
       POSTGRES_USER: postgres
@@ -9,12 +10,28 @@ services:
       - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "log_min_messages=ERROR", "-c", "log_statement=none"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d restaurant_reservations"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
+  # Redis para cache y broker Celery
   redis:
     image: redis:7-alpine
     ports:
       - "6381:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
+  # Aplicación Django principal
   web:
     build: .
     ports:
@@ -22,47 +39,64 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
       - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
       - RESERVATION_PENDING_TIMEOUT=15
     command: >
-      sh -c "uv run python manage.py migrate &&
-             uv run python manage.py runserver 0.0.0.0:8000"
+      bash -c "uv run python manage.py migrate &&
+               uv run python manage.py runserver 0.0.0.0:8000"
 
-  celery:
+  # Worker Celery para desarrollo y tests
+  celery-worker:
     build: .
     volumes:
       - .:/app
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-      - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
-      - RESERVATION_PENDING_TIMEOUT=15
-    command: uv run celery -A config worker --loglevel=info
+    command: uv run celery -A config worker --loglevel=info --concurrency=2
 
+  # Celery Beat para tareas programadas
   celery-beat:
     build: .
     volumes:
       - .:/app
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
-      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-      - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
-      - RESERVATION_PENDING_TIMEOUT=15
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     command: uv run celery -A config beat --loglevel=info
 
 volumes:
   postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: reservaflow_network

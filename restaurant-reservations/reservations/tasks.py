@@ -5,7 +5,6 @@ import socket
 from datetime import timedelta
 
 from celery import shared_task
-from celery.exceptions import Retry
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend

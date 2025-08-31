@@ -2,12 +2,10 @@
 """
 Script para ejecutar tests realistas con servicios Docker reales
 """
-import os
 import sys
 import time
 import subprocess
 import argparse
-from pathlib import Path
 
 def run_command(command, check=True, cwd=None):
     """Ejecutar comando y mostrar output"""
@@ -99,7 +97,7 @@ def run_tests(test_path=None, verbose=False, failfast=False):
         "--tb=short",
         "--disable-warnings",
         "--durations=10",  # Mostrar los 10 tests más lentos
-        f"--maxfail=5",    # Parar después de 5 fallos
+        "--maxfail=5",    # Parar después de 5 fallos
         "--timeout=300"    # Timeout de 5 minutos por test
     ])
     

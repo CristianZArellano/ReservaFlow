@@ -2,22 +2,18 @@
 Unit tests for models
 """
 from datetime import date, time, timedelta
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from unittest.mock import patch
 
-from restaurants.models import Restaurant, Table
-from customers.models import Customer
 from reservations.models import Reservation
 from tests.fixtures.factories import (
     RestaurantFactory, 
     TableFactory, 
     CustomerFactory, 
     ReservationFactory,
-    ConfirmedReservationFactory,
-    ExpiredReservationFactory
+    ConfirmedReservationFactory
 )
 from tests.fixtures.base import BaseTestCase, CeleryTestCase
 

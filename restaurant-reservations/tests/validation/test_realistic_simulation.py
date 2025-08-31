@@ -6,10 +6,8 @@ import os
 import sys
 import time
 import threading
-import subprocess
 from datetime import datetime, timedelta, date
-from unittest.mock import Mock, patch, MagicMock
-from django.test import TestCase, TransactionTestCase
+from unittest.mock import patch, MagicMock
 from django.db import transaction, IntegrityError, connections
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -21,7 +19,6 @@ django.setup()
 
 from reservations.models import Reservation
 from reservations.tasks import expire_reservation, send_confirmation_email
-from restaurants.services import TableReservationLock, check_table_availability
 from tests.fixtures.factories import RestaurantFactory, TableFactory, CustomerFactory
 
 
@@ -465,11 +462,11 @@ def run_realistic_tests():
     env.setup_celery_simulation()
     db_type = env.setup_database_constraints()
     
-    print(f"\n📊 ENTORNO DE TESTS:")
+    print("\n📊 ENTORNO DE TESTS:")
     print(f"  🔴 Redis: {'Real' if redis_real else 'Simulado'}")
     print(f"  📊 Base de datos: {db_type}")
-    print(f"  📨 Celery: Simulado (comportamiento realista)")
-    print(f"  📧 Email: Mock")
+    print("  📨 Celery: Simulado (comportamiento realista)")
+    print("  📧 Email: Mock")
     
     # Ejecutar tests
     test_results = {}
@@ -516,14 +513,14 @@ def run_realistic_tests():
         status = "✅ PASÓ" if passed else "❌ FALLÓ"
         print(f"  {test_name:20} {status}")
     
-    print(f"\n📊 RESUMEN:")
+    print("\n📊 RESUMEN:")
     print(f"  Total: {total_tests}")
     print(f"  Pasaron: {passed_tests}")
     print(f"  Fallaron: {total_tests - passed_tests}")
     print(f"  Éxito: {passed_tests/total_tests*100:.1f}%")
     
     # Análisis de diferencias con mocks
-    print(f"\n🔍 ANÁLISIS REALISTA vs MOCKS:")
+    print("\n🔍 ANÁLISIS REALISTA vs MOCKS:")
     if redis_real:
         print("  🔴 Redis REAL detectó condiciones de carrera reales")
         print("  🔴 Locks distribuidos funcionando correctamente")

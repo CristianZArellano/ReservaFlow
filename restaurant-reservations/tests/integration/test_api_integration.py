@@ -1,7 +1,6 @@
 """
 Integration tests for API endpoints
 """
-from datetime import date, time
 from django.test import TransactionTestCase
 from django.test import Client
 from unittest.mock import patch

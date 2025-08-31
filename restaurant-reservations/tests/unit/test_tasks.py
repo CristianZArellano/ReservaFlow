@@ -4,7 +4,7 @@ Unit tests for Celery tasks
 from datetime import timedelta, time
 from django.test import TestCase
 from django.utils import timezone
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from reservations.models import Reservation
 from reservations.tasks import (
@@ -15,8 +15,7 @@ from reservations.tasks import (
 )
 from tests.fixtures.factories import (
     ReservationFactory,
-    ConfirmedReservationFactory,
-    ExpiredReservationFactory
+    ConfirmedReservationFactory
 )
 from tests.fixtures.base import EmailTestCase
 
