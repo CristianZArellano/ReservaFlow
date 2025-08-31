@@ -5,16 +5,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reservations', '0002_reservation_reservation_table_i_2f1b8b_idx_and_more'),
-        ('restaurants', '0002_table'),
+        ("reservations", "0002_reservation_reservation_table_i_2f1b8b_idx_and_more"),
+        ("restaurants", "0002_table"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='reservation',
-            name='table',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='restaurants.table'),
+            model_name="reservation",
+            name="table",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to="restaurants.table"
+            ),
         ),
     ]

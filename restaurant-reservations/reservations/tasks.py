@@ -8,6 +8,7 @@ from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
+from django.core.exceptions import ValidationError
 from django.db import transaction, OperationalError
 
 from .models import Reservation
@@ -17,21 +18,24 @@ logger = logging.getLogger(__name__)
 # Definir excepciones específicas para retry
 SMTP_RETRY_EXCEPTIONS = (
     smtplib.SMTPServerDisconnected,
-    smtplib.SMTPConnectError, 
+    smtplib.SMTPConnectError,
     smtplib.SMTPRecipientsRefused,
     smtplib.SMTPDataError,
     socket.timeout,
     socket.gaierror,
     ConnectionError,
-    OSError
+    OSError,
 )
 
-DATABASE_RETRY_EXCEPTIONS = (
-    OperationalError,
+DATABASE_RETRY_EXCEPTIONS = (OperationalError,)
+
+
+@shared_task(
+    bind=True,
+    autoretry_for=DATABASE_RETRY_EXCEPTIONS,
+    retry_backoff=True,
+    max_retries=3,
 )
-
-
-@shared_task(bind=True, autoretry_for=DATABASE_RETRY_EXCEPTIONS, retry_backoff=True, max_retries=3)
 def expire_reservation(self, reservation_id):
     """Expira una reserva si no ha sido confirmada antes de expires_at"""
     try:
@@ -49,24 +53,24 @@ def expire_reservation(self, reservation_id):
             logger.info(f"Reserva {reservation_id} no necesita expirar")
             return {"reservation_id": str(reservation.id), "status": reservation.status}
 
-    except Reservation.DoesNotExist:
-        logger.warning(f"Reserva {reservation_id} no encontrada")
+    except (Reservation.DoesNotExist, ValidationError):
+        logger.warning(f"Reserva {reservation_id} no encontrada o ID inválido")
         return {"reservation_id": reservation_id, "error": "not_found"}
-    
+
     except DATABASE_RETRY_EXCEPTIONS as exc:
         logger.warning(f"Error de base de datos en expire_reservation: {exc}")
         # Incrementar delay basado en el número de retry
-        countdown = 2 ** self.request.retries
+        countdown = 2**self.request.retries
         raise self.retry(exc=exc, countdown=countdown, max_retries=3)
 
 
 @shared_task(
-    bind=True, 
+    bind=True,
     autoretry_for=SMTP_RETRY_EXCEPTIONS,
-    retry_backoff=True, 
+    retry_backoff=True,
     max_retries=5,
     default_retry_delay=60,  # 1 minuto base
-    retry_backoff_max=600    # Máximo 10 minutos
+    retry_backoff_max=600,  # Máximo 10 minutos
 )
 def send_confirmation_email(self, reservation_id):
     """Envía email de confirmación de reserva con retry inteligente"""
@@ -83,11 +87,11 @@ def send_confirmation_email(self, reservation_id):
 
         # Usar backend SMTP con timeout específico
         backend = EmailBackend(
-            host=getattr(settings, 'EMAIL_HOST', 'localhost'),
-            port=getattr(settings, 'EMAIL_PORT', 587),
-            username=getattr(settings, 'EMAIL_HOST_USER', ''),
-            password=getattr(settings, 'EMAIL_HOST_PASSWORD', ''),
-            use_tls=getattr(settings, 'EMAIL_USE_TLS', True),
+            host=getattr(settings, "EMAIL_HOST", "localhost"),
+            port=getattr(settings, "EMAIL_PORT", 587),
+            username=getattr(settings, "EMAIL_HOST_USER", ""),
+            password=getattr(settings, "EMAIL_HOST_PASSWORD", ""),
+            use_tls=getattr(settings, "EMAIL_USE_TLS", True),
             timeout=30,  # Timeout de 30 segundos
         )
 
@@ -106,26 +110,26 @@ def send_confirmation_email(self, reservation_id):
     except Reservation.DoesNotExist:
         logger.error(f"Reserva {reservation_id} no encontrada")
         return {"reservation_id": reservation_id, "error": "not_found"}
-    
+
     except SMTP_RETRY_EXCEPTIONS as exc:
         # Log del tipo específico de error
         error_type = type(exc).__name__
         logger.warning(f"Error SMTP ({error_type}) en send_confirmation_email: {exc}")
-        
+
         # Estrategia de retry diferenciada por tipo de error
         if isinstance(exc, (smtplib.SMTPServerDisconnected, ConnectionError)):
             # Errores de conexión - retry más rápido
-            countdown = min(30 * (2 ** self.request.retries), 300)  # Max 5 min
+            countdown = min(30 * (2**self.request.retries), 300)  # Max 5 min
         elif isinstance(exc, smtplib.SMTPRecipientsRefused):
             # Error de destinatario - probablemente no vale la pena retry
             logger.error(f"Destinatario inválido para reserva {reservation_id}")
             return {"reservation_id": reservation_id, "error": "invalid_recipient"}
         else:
             # Otros errores SMTP - retry con backoff normal
-            countdown = min(60 * (2 ** self.request.retries), 600)  # Max 10 min
-            
+            countdown = min(60 * (2**self.request.retries), 600)  # Max 10 min
+
         raise self.retry(exc=exc, countdown=countdown, max_retries=5)
-    
+
     except Exception as exc:
         # Errores no recuperables
         logger.error(f"Error no recuperable en send_confirmation_email: {exc}")

@@ -5,23 +5,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('restaurants', '0001_initial'),
+        ("restaurants", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Table',
+            name="Table",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.CharField(max_length=10, verbose_name='Número')),
-                ('capacity', models.PositiveIntegerField(verbose_name='Capacidad')),
-                ('location', models.CharField(choices=[('indoor', 'Interior'), ('outdoor', 'Terraza'), ('bar', 'Barra')], default='indoor', max_length=10)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('restaurant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tables', to='restaurants.restaurant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("number", models.CharField(max_length=10, verbose_name="Número")),
+                ("capacity", models.PositiveIntegerField(verbose_name="Capacidad")),
+                (
+                    "location",
+                    models.CharField(
+                        choices=[
+                            ("indoor", "Interior"),
+                            ("outdoor", "Terraza"),
+                            ("bar", "Barra"),
+                        ],
+                        default="indoor",
+                        max_length=10,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "restaurant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tables",
+                        to="restaurants.restaurant",
+                    ),
+                ),
             ],
         ),
     ]

@@ -6,29 +6,68 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('customers', '0001_initial'),
-        ('restaurants', '0002_table'),
+        ("customers", "0001_initial"),
+        ("restaurants", "0002_table"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Reservation',
+            name="Reservation",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('reservation_date', models.DateField(verbose_name='Fecha')),
-                ('reservation_time', models.TimeField(verbose_name='Hora')),
-                ('party_size', models.PositiveIntegerField(verbose_name='Personas')),
-                ('status', models.CharField(choices=[('pending', 'Pendiente'), ('confirmed', 'Confirmada'), ('completed', 'Completada'), ('cancelled', 'Cancelada'), ('no_show', 'No asistió'), ('expired', 'Expirada')], default='pending', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True)),
-                ('customer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='customers.customer')),
-                ('restaurant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='restaurants.restaurant')),
-                ('table', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='restaurants.table')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("reservation_date", models.DateField(verbose_name="Fecha")),
+                ("reservation_time", models.TimeField(verbose_name="Hora")),
+                ("party_size", models.PositiveIntegerField(verbose_name="Personas")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pendiente"),
+                            ("confirmed", "Confirmada"),
+                            ("completed", "Completada"),
+                            ("cancelled", "Cancelada"),
+                            ("no_show", "No asistió"),
+                            ("expired", "Expirada"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "customer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="customers.customer",
+                    ),
+                ),
+                (
+                    "restaurant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="restaurants.restaurant",
+                    ),
+                ),
+                (
+                    "table",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="restaurants.table",
+                    ),
+                ),
             ],
         ),
     ]

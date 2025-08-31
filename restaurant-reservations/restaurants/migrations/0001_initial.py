@@ -4,33 +4,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Restaurant',
+            name="Restaurant",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Nombre')),
-                ('description', models.TextField(blank=True, verbose_name='Descripción')),
-                ('address', models.CharField(max_length=300, verbose_name='Dirección')),
-                ('phone', models.CharField(max_length=20, verbose_name='Teléfono')),
-                ('email', models.EmailField(max_length=254, verbose_name='Email')),
-                ('opening_time', models.TimeField(verbose_name='Hora de apertura')),
-                ('closing_time', models.TimeField(verbose_name='Hora de cierre')),
-                ('reservation_duration', models.PositiveIntegerField(default=120, verbose_name='Duración reserva (minutos)')),
-                ('advance_booking_days', models.PositiveIntegerField(default=30, verbose_name='Días de anticipación')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Activo')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Nombre")),
+                (
+                    "description",
+                    models.TextField(blank=True, verbose_name="Descripción"),
+                ),
+                ("address", models.CharField(max_length=300, verbose_name="Dirección")),
+                ("phone", models.CharField(max_length=20, verbose_name="Teléfono")),
+                ("email", models.EmailField(max_length=254, verbose_name="Email")),
+                ("opening_time", models.TimeField(verbose_name="Hora de apertura")),
+                ("closing_time", models.TimeField(verbose_name="Hora de cierre")),
+                (
+                    "reservation_duration",
+                    models.PositiveIntegerField(
+                        default=120, verbose_name="Duración reserva (minutos)"
+                    ),
+                ),
+                (
+                    "advance_booking_days",
+                    models.PositiveIntegerField(
+                        default=30, verbose_name="Días de anticipación"
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Activo")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Restaurante',
-                'verbose_name_plural': 'Restaurantes',
+                "verbose_name": "Restaurante",
+                "verbose_name_plural": "Restaurantes",
             },
         ),
     ]

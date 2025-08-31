@@ -4,24 +4,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('customers', '0001_initial'),
-        ('reservations', '0001_initial'),
-        ('restaurants', '0002_table'),
+        ("customers", "0001_initial"),
+        ("reservations", "0001_initial"),
+        ("restaurants", "0002_table"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='reservation',
-            index=models.Index(fields=['table', 'reservation_date', 'reservation_time'], name='reservation_table_i_2f1b8b_idx'),
+            model_name="reservation",
+            index=models.Index(
+                fields=["table", "reservation_date", "reservation_time"],
+                name="reservation_table_i_2f1b8b_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='reservation',
-            index=models.Index(fields=['status', 'expires_at'], name='reservation_status_f2f985_idx'),
+            model_name="reservation",
+            index=models.Index(
+                fields=["status", "expires_at"], name="reservation_status_f2f985_idx"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='reservation',
-            constraint=models.UniqueConstraint(condition=models.Q(('status__in', ['pending', 'confirmed'])), fields=('table', 'reservation_date', 'reservation_time'), name='unique_active_reservation_per_table_datetime'),
+            model_name="reservation",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("status__in", ["pending", "confirmed"])),
+                fields=("table", "reservation_date", "reservation_time"),
+                name="unique_active_reservation_per_table_datetime",
+            ),
         ),
     ]

@@ -213,12 +213,129 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REDIS_URL = config("REDIS_URL", default="redis://redis:6379/0")
 
 # Celery Configuration
+# ================================
+# CELERY CONFIGURATION
+# ================================
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
+
+# Task serialization
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
+
+# Task execution
+CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", default=False, cast=bool)
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_IGNORE_RESULT = False
+CELERY_TASK_STORE_EAGER_RESULT = True
+
+# Task routing
+CELERY_TASK_ROUTES = {
+    "reservations.tasks.*": {"queue": "reservations"},
+    "notifications.tasks.*": {"queue": "notifications"},
+    "customers.tasks.*": {"queue": "customers"},
+    "maintenance.tasks.*": {"queue": "maintenance"},
+}
+
+# Worker configuration
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+
+# Result backend settings
+CELERY_RESULT_EXPIRES = 3600  # 1 hour
+CELERY_TASK_RESULT_EXPIRES = 3600
+
+# Retry configuration
+CELERY_TASK_ANNOTATIONS = {
+    "*": {
+        "rate_limit": "100/m",
+        "time_limit": 300,  # 5 minutes
+        "soft_time_limit": 240,  # 4 minutes
+    },
+    "notifications.tasks.send_notification": {
+        "rate_limit": "500/m",
+        "max_retries": 3,
+        "default_retry_delay": 60,
+    },
+    "reservations.tasks.expire_reservation": {
+        "rate_limit": "200/m",
+        "max_retries": 2,
+    },
+}
+
+# Beat schedule for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    # Limpieza y mantenimiento crítico
+    "cleanup-expired-reservations": {
+        "task": "maintenance.tasks.cleanup_expired_reservations",
+        "schedule": 300.0,  # Every 5 minutes
+        "options": {"expires": 240},  # Expire if not run in 4 minutes
+    },
+    # Notificaciones
+    "process-pending-notifications": {
+        "task": "notifications.tasks.process_pending_notifications",
+        "schedule": 60.0,  # Every minute
+        "options": {"expires": 45},  # Expire if not run in 45 seconds
+    },
+    "cleanup-old-notifications": {
+        "task": "notifications.tasks.cleanup_old_notifications",
+        "schedule": 86400.0,  # Daily
+        "options": {"expires": 3600},
+    },
+    "retry-failed-notifications": {
+        "task": "notifications.tasks.retry_failed_notifications",
+        "schedule": 3600.0,  # Every hour
+        "options": {"expires": 1800},  # 30 minutes
+    },
+    # Estadísticas y análisis
+    "update-customer-stats": {
+        "task": "customers.tasks.update_all_customer_stats",
+        "schedule": 3600.0,  # Every hour
+        "options": {"expires": 1800},
+    },
+    "generate-customer-insights": {
+        "task": "customers.tasks.generate_customer_insights",
+        "schedule": 86400.0,  # Daily
+        "options": {"expires": 3600},
+    },
+    "identify-inactive-customers": {
+        "task": "customers.tasks.identify_inactive_customers",
+        "schedule": 604800.0,  # Weekly
+        "options": {"expires": 7200},  # 2 hours
+    },
+    # Mantenimiento del sistema
+    "database-maintenance": {
+        "task": "maintenance.tasks.database_maintenance",
+        "schedule": 86400.0,  # Daily at midnight
+        "options": {"expires": 7200},  # 2 hours
+    },
+    "system-health-report": {
+        "task": "maintenance.tasks.generate_system_health_report",
+        "schedule": 3600.0,  # Every hour
+        "options": {"expires": 1800},  # 30 minutes
+    },
+    "backup-critical-data": {
+        "task": "maintenance.tasks.backup_critical_data",
+        "schedule": 86400.0,  # Daily
+        "options": {"expires": 3600},
+        "kwargs": {"backup_type": "daily"},
+    },
+    # Optimización de restaurantes
+    "calculate-restaurant-stats": {
+        "task": "restaurants.tasks.calculate_restaurant_stats",
+        "schedule": 3600.0,  # Every hour
+        "options": {"expires": 1800},
+    },
+}
+
+# Redis connection pool settings for Celery
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
 
 # Email Configuration
 EMAIL_BACKEND = config(
