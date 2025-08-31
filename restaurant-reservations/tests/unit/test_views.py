@@ -21,7 +21,7 @@ class ReservationViewSetTest(BaseAPITestCase):
         ConfirmedReservationFactory(restaurant=self.restaurant)
 
         # Make request
-        response = self.client.get("/api/")
+        response = self.client.get("/api/reservations/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -42,7 +42,7 @@ class ReservationViewSetTest(BaseAPITestCase):
         reservation = ReservationFactory(restaurant=self.restaurant)
 
         # Make request
-        url = f"/api/{reservation.id}/"
+        url = f"/api/reservations/{reservation.id}/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -86,7 +86,7 @@ class ReservationViewSetTest(BaseAPITestCase):
         }
 
         # Make request
-        response = self.client.post("/api/", data, format="json")
+        response = self.client.post("/api/reservations/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -130,7 +130,7 @@ class ReservationViewSetTest(BaseAPITestCase):
         }
 
         # Make request
-        response = self.client.post("/api/", data, format="json")
+        response = self.client.post("/api/reservations/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         data = response.json()
@@ -146,7 +146,7 @@ class ReservationViewSetTest(BaseAPITestCase):
             "party_size": 2,
         }
 
-        response = self.client.post("/api/", data, format="json")
+        response = self.client.post("/api/reservations/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         data = response.json()
@@ -168,7 +168,7 @@ class ReservationViewSetTest(BaseAPITestCase):
         }
 
         # Make request
-        response = self.client.post("/api/", data, format="json")
+        response = self.client.post("/api/reservations/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         data = response.json()
@@ -203,7 +203,7 @@ class ReservationViewSetTest(BaseAPITestCase):
             "party_size": 2,
         }
 
-        response = self.client.post("/api/", data, format="json")
+        response = self.client.post("/api/reservations/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         data = response.json()
@@ -265,7 +265,7 @@ class ReservationAPIIntegrationTest(BaseAPITestCase):
             }
 
             # Create
-            response = self.client.post("/api/", data, format="json")
+            response = self.client.post("/api/reservations/", data, format="json")
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
             reservation_id = response.json()["id"]
@@ -276,7 +276,7 @@ class ReservationAPIIntegrationTest(BaseAPITestCase):
             self.assertEqual(response.json()["status"], "pending")
 
             # List (should include our reservation)
-            response = self.client.get("/api/")
+            response = self.client.get("/api/reservations/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             reservation_ids = [r["id"] for r in response.json()]
             self.assertIn(reservation_id, reservation_ids)
@@ -288,7 +288,7 @@ class APIErrorHandlingTest(BaseAPITestCase):
     def test_invalid_json_request(self):
         """Test handling invalid JSON in request"""
         response = self.client.post(
-            "/api/", "invalid json", content_type="application/json"
+            "/api/reservations/", "invalid json", content_type="application/json"
         )
 
         # Django should handle this gracefully
@@ -296,7 +296,7 @@ class APIErrorHandlingTest(BaseAPITestCase):
 
     def test_malformed_uuid_in_url(self):
         """Test handling malformed UUID in URL"""
-        url = "/api/not-a-uuid/"
+        url = "/api/reservations/not-a-uuid/"
         response = self.client.get(url)
 
         # Should return 404, 400, or 500 (Django raises ValidationError on malformed UUID)
@@ -325,7 +325,7 @@ class APIErrorHandlingTest(BaseAPITestCase):
                 "party_size": 2,
             }
 
-            response = self.client.post("/api/", data, format="json")
+            response = self.client.post("/api/reservations/", data, format="json")
             self.assertEqual(
                 response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
             )

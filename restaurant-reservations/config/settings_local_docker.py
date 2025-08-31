@@ -10,40 +10,26 @@ from .settings import *  # noqa: F403, F401
 # ================================
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "restaurant_reservations",
-        "USER": "postgres", 
-        "PASSWORD": "postgres",
-        "HOST": "localhost",  # Conectar al puerto expuesto localmente
-        "PORT": "5434",       # Puerto expuesto por Docker
-        "OPTIONS": {},
-        "TEST": {
-            "NAME": "test_restaurant_reservations_docker",  # BD temporal
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",  # Base de datos en memoria para tests rápidos
     }
 }
 
 # ================================
-# REDIS PARA LOCKS Y CACHE
+# REDIS PARA LOCKS Y CACHE - FALLBACK A LOCMEM
 # ================================
-REDIS_URL = "redis://localhost:6381/0"  # Puerto expuesto por Docker
-
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "db": 0,
-        },
-        "TIMEOUT": 300,
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 
 # ================================
-# CELERY CON REDIS EXTERNO
+# CELERY CON MODO EAGER
 # ================================
-CELERY_BROKER_URL = "redis://localhost:6381/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6381/0"
+CELERY_BROKER_URL = "memory://"
+CELERY_RESULT_BACKEND = "cache+memory://"
 
 # Para tests, usaremos modo eager para control determinístico
 CELERY_TASK_ALWAYS_EAGER = True
@@ -98,6 +84,6 @@ LOGGING = {
 }
 
 print("🐳 CONFIGURACIÓN DOCKER LOCAL CARGADA")
-print(f"📊 Database: localhost:5434")
-print(f"🔴 Redis: localhost:6381")
+print(f"📊 Database: localhost:5436")
+print(f"🔴 Redis: localhost:6385")
 print(f"⚡ Celery Eager Mode: {CELERY_TASK_ALWAYS_EAGER}")

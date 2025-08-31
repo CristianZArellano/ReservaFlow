@@ -49,7 +49,7 @@ class APIIntegrationTest(TransactionTestCase):
 
         # Make API call
         response = self.client.post(
-            "/api/", json.dumps(data), content_type="application/json"
+            "/api/reservations/", json.dumps(data), content_type="application/json"
         )
 
         # Verify response
@@ -93,13 +93,13 @@ class APIIntegrationTest(TransactionTestCase):
         }
 
         response1 = self.client.post(
-            "/api/", json.dumps(data), content_type="application/json"
+            "/api/reservations/", json.dumps(data), content_type="application/json"
         )
         self.assertEqual(response1.status_code, 201)
 
         # Try to create conflicting reservation
         response2 = self.client.post(
-            "/api/", json.dumps(data), content_type="application/json"
+            "/api/reservations/", json.dumps(data), content_type="application/json"
         )
         self.assertEqual(response2.status_code, 400)
 
@@ -114,7 +114,7 @@ class APIIntegrationTest(TransactionTestCase):
         reservation2 = ReservationFactory(restaurant=self.restaurant)
 
         # Test list endpoint
-        response = self.client.get("/api/")
+        response = self.client.get("/api/reservations/")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -150,7 +150,7 @@ class APIIntegrationTest(TransactionTestCase):
         }
 
         response = self.client.post(
-            "/api/", json.dumps(data), content_type="application/json"
+            "/api/reservations/", json.dumps(data), content_type="application/json"
         )
 
         self.assertEqual(response.status_code, 409)
@@ -164,7 +164,7 @@ class APIIntegrationTest(TransactionTestCase):
         data = {"reservation_date": "2025-09-15", "party_size": 2}
 
         response = self.client.post(
-            "/api/", json.dumps(data), content_type="application/json"
+            "/api/reservations/", json.dumps(data), content_type="application/json"
         )
 
         self.assertEqual(response.status_code, 400)
@@ -227,7 +227,7 @@ class APIPerformanceIntegrationTest(TransactionTestCase):
         # Create reservations
         for data in reservation_requests:
             response = self.client.post(
-                "/api/", json.dumps(data), content_type="application/json"
+                "/api/reservations/", json.dumps(data), content_type="application/json"
             )
 
             if response.status_code == 201:
@@ -256,7 +256,7 @@ class APIPerformanceIntegrationTest(TransactionTestCase):
             reservations.append(reservation)
 
         # Test list endpoint performance
-        response = self.client.get("/api/")
+        response = self.client.get("/api/reservations/")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -341,7 +341,7 @@ class APISecurityIntegrationTest(TransactionTestCase):
         }
 
         # Send as form data instead of JSON
-        response = self.client.post("/api/", data)
+        response = self.client.post("/api/reservations/", data)
 
         # Should handle different content types appropriately
         self.assertIn(response.status_code, [200, 201, 400, 415])

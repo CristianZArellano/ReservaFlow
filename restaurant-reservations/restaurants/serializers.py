@@ -189,7 +189,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
             "accepts_walk_ins",
             "is_active",
         ]
-        read_only_fields = "__all__"
+        read_only_fields = ("id", "created_at", "updated_at")
 
 
 class TableSerializer(serializers.ModelSerializer):
@@ -331,7 +331,7 @@ class RestaurantStatsSerializer(serializers.ModelSerializer):
             "occupancy_rate",
             "is_active",
         ]
-        read_only_fields = "__all__"
+        read_only_fields = ("id", "created_at", "updated_at")
 
     def get_table_count(self, obj):
         """Get number of active tables"""

@@ -8,5 +8,5 @@ router = DefaultRouter()
 router.register("", CustomerViewSet, basename="customer")
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path("", include(router.urls)),
 ]

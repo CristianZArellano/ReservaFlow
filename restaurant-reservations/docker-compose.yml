@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5434:5432"
+      - "5436:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     command: ["postgres", "-c", "log_min_messages=ERROR", "-c", "log_statement=none"]
@@ -21,7 +21,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6381:6379"
+      - "6385:6379"
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -53,8 +53,14 @@ services:
       - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
       - RESERVATION_PENDING_TIMEOUT=15
     command: >
-      bash -c "uv run python manage.py migrate &&
-               uv run python manage.py runserver 0.0.0.0:8000"
+      bash -c "
+        echo 'Waiting for database...' &&
+        until nc -z db 5432; do sleep 1; done &&
+        echo 'Database is ready!' &&
+        uv run python manage.py migrate &&
+        echo 'Starting Django server...' &&
+        uv run python manage.py runserver 0.0.0.0:8000
+      "
 
   # Worker Celery para desarrollo y tests
   celery-worker:
@@ -62,10 +68,7 @@ services:
     volumes:
       - .:/app
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - web
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
@@ -73,7 +76,12 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-    command: uv run celery -A config worker --loglevel=info --concurrency=2
+    command: >
+      bash -c "
+        echo 'Waiting for web service...' &&
+        sleep 10 &&
+        uv run celery -A config worker --loglevel=info --concurrency=2
+      "
 
   # Celery Beat para tareas programadas
   celery-beat:
@@ -81,17 +89,19 @@ services:
     volumes:
       - .:/app
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - web
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    command: uv run celery -A config beat --loglevel=info
+    command: >
+      bash -c "
+        echo 'Waiting for web service...' &&
+        sleep 15 &&
+        uv run celery -A config beat --loglevel=info
+      "
 
 volumes:
   postgres_data:

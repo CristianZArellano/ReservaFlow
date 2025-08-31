@@ -9,5 +9,5 @@ router = DefaultRouter()
 router.register("", ReservationViewSet, basename="reservation")
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path("", include(router.urls)),
 ]

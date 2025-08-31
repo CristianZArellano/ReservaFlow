@@ -9,5 +9,5 @@ router.register("restaurants", RestaurantViewSet, basename="restaurant")
 router.register("tables", TableViewSet, basename="table")
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path("", include(router.urls)),
 ]
