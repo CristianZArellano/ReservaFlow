@@ -20,13 +20,16 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app  # Agregar esta línea
+      - .:/app
     depends_on:
       - db
       - redis
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
+      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
+      - RESERVATION_PENDING_TIMEOUT=15
     command: >
       sh -c "uv run python manage.py migrate &&
              uv run python manage.py runserver 0.0.0.0:8000"
@@ -34,25 +37,31 @@ services:
   celery:
     build: .
     volumes:
-      - .:/app  # Agregar esta línea
+      - .:/app
     depends_on:
       - db
       - redis
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
-    command: uv run celery -A config worker --loglevel=info --autoreload
+      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
+      - RESERVATION_PENDING_TIMEOUT=15
+    command: uv run celery -A config worker --loglevel=info
 
   celery-beat:
     build: .
     volumes:
-      - .:/app  # Agregar esta línea
+      - .:/app
     depends_on:
       - db
       - redis
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/restaurant_reservations
       - REDIS_URL=redis://redis:6379/0
+      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - DEFAULT_FROM_EMAIL=ReservaFlow <noreply@reservaflow.com>
+      - RESERVATION_PENDING_TIMEOUT=15
     command: uv run celery -A config beat --loglevel=info
 
 volumes:

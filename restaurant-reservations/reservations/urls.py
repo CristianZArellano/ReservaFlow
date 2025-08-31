@@ -1,10 +1,13 @@
 # reservations/urls.py
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import ReservationViewSet
 
+# Create router for API endpoints
 router = DefaultRouter()
-# con '' la ruta base será directamente /reservations/
 router.register("", ReservationViewSet, basename="reservation")
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('api/', include(router.urls)),
+]

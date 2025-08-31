@@ -57,6 +57,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "config.middleware.HealthCheckMiddleware",
+    "config.middleware.RequestLoggingMiddleware", 
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -65,6 +67,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.middleware.ErrorHandlingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -90,26 +93,77 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Database configuration
+# Database configuration with robust fallback
 DATABASE_URL = config("DATABASE_URL", default=None)
 
 if DATABASE_URL:
     # Parse DATABASE_URL for Docker/production
     import dj_database_url
-
     DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 else:
-    # Fallback to individual settings for local development
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME", default="restaurant_reservations"),
-            "USER": config("DB_USER", default="postgres"),
-            "PASSWORD": config("DB_PASSWORD", default="postgres"),
-            "HOST": config("DB_HOST", default="db"),
-            "PORT": config("DB_PORT", default="5432"),
+    # Try PostgreSQL first, fallback to SQLite if not available
+    DB_ENGINE = config("DB_ENGINE", default="auto")
+    
+    if DB_ENGINE == "auto":
+        # Auto-detect best available database
+        try:
+            import psycopg2
+            # Try to connect to PostgreSQL
+            import psycopg2
+            test_conn = psycopg2.connect(
+                host=config("DB_HOST", default="localhost"),
+                port=config("DB_PORT", default="5432"),
+                user=config("DB_USER", default="postgres"),
+                password=config("DB_PASSWORD", default="postgres"),
+                database="postgres",
+                connect_timeout=3
+            )
+            test_conn.close()
+            
+            # PostgreSQL available
+            DATABASES = {
+                "default": {
+                    "ENGINE": "django.db.backends.postgresql",
+                    "NAME": config("DB_NAME", default="restaurant_reservations"),
+                    "USER": config("DB_USER", default="postgres"),
+                    "PASSWORD": config("DB_PASSWORD", default="postgres"),
+                    "HOST": config("DB_HOST", default="localhost"),
+                    "PORT": config("DB_PORT", default="5432"),
+                    "OPTIONS": {
+                        "connect_timeout": 10,
+                    },
+                }
+            }
+        except (ImportError, Exception):
+            # Fallback to SQLite for development
+            DATABASES = {
+                "default": {
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "NAME": BASE_DIR / "db.sqlite3",
+                }
+            }
+    elif DB_ENGINE == "postgresql":
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": config("DB_NAME", default="restaurant_reservations"),
+                "USER": config("DB_USER", default="postgres"),
+                "PASSWORD": config("DB_PASSWORD", default="postgres"),
+                "HOST": config("DB_HOST", default="localhost"),
+                "PORT": config("DB_PORT", default="5432"),
+                "OPTIONS": {
+                    "connect_timeout": 10,
+                },
+            }
         }
-    }
+    else:
+        # SQLite fallback
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
 
 
 # Password validation
@@ -164,6 +218,136 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
+# Email Configuration
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND", 
+    default="django.core.mail.backends.console.EmailBackend"  # Para desarrollo, imprime en consola
+)
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@reservaflow.com")
 
-# Configuración de reservas
-RESERVATION_PENDING_TIMEOUT = 1  # 1 minuto para pruebas
+# Reservation Settings
+RESERVATION_PENDING_TIMEOUT = config("RESERVATION_PENDING_TIMEOUT", default=15, cast=int)  # minutes
+
+# Security Settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# REST Framework Settings
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+        'reservation': '10/minute',  # Rate limit for reservations
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'reservaflow.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'reservations': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'restaurants': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 20,
+                'socket_timeout': 5,
+                'socket_connect_timeout': 5,
+                'retry_on_timeout': True,
+            }
+        },
+        'KEY_PREFIX': 'reservaflow',
+        'TIMEOUT': 300,  # Default 5 minutes
+    }
+}
+
+# Session Configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 3600  # 1 hour
+
+# Create logs directory if it doesn't exist
+import os
+logs_dir = BASE_DIR / 'logs'
+os.makedirs(logs_dir, exist_ok=True)

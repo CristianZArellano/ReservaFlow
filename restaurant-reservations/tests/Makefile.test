@@ -1,0 +1,151 @@
+# Makefile para tests realistas con Docker
+.PHONY: help test-realistic test-setup test-cleanup test-redis test-celery test-db test-integration test-unit test-all test-ci
+
+# Variables
+DOCKER_COMPOSE_TEST = docker compose -f docker-compose.test.yml
+TEST_WEB_SERVICE = test-web
+PYTEST_OPTS = -c pytest_realistic.ini --confcutdir=conftest_realistic.py
+
+help: ## Mostrar ayuda
+	@echo "🧪 COMANDOS DE TESTS REALISTAS"
+	@echo "================================="
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+test-setup: ## Configurar entorno de tests con servicios Docker
+	@echo "🏗️ Configurando entorno de tests realistas..."
+	$(DOCKER_COMPOSE_TEST) down -v
+	$(DOCKER_COMPOSE_TEST) build
+	$(DOCKER_COMPOSE_TEST) up -d test-db test-redis
+	@echo "⏳ Esperando que los servicios estén listos..."
+	sleep 15
+	$(DOCKER_COMPOSE_TEST) up -d test-web test-celery-worker
+	sleep 10
+	@echo "📊 Ejecutando migraciones..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) python manage.py migrate --settings=config.settings_test
+	@echo "✅ Entorno listo"
+
+test-cleanup: ## Limpiar entorno de tests
+	@echo "🧹 Limpiando entorno de tests..."
+	$(DOCKER_COMPOSE_TEST) down -v
+	docker volume prune -f
+	@echo "✅ Limpieza completada"
+
+test-status: ## Mostrar estado de servicios de test
+	@echo "📊 Estado de servicios:"
+	$(DOCKER_COMPOSE_TEST) ps
+	@echo "\n🔴 Redis status:"
+	$(DOCKER_COMPOSE_TEST) exec test-redis redis-cli ping || echo "❌ Redis no disponible"
+	@echo "\n📊 PostgreSQL status:"
+	$(DOCKER_COMPOSE_TEST) exec test-db pg_isready -U test_user || echo "❌ PostgreSQL no disponible"
+	@echo "\n📨 Celery workers:"
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) celery -A config inspect stats || echo "❌ Celery no disponible"
+
+test-redis: test-setup ## Ejecutar solo tests de Redis
+	@echo "🔴 Ejecutando tests de Redis realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -m redis -v
+
+test-celery: test-setup ## Ejecutar solo tests de Celery
+	@echo "📨 Ejecutando tests de Celery realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -m celery -v
+
+test-db: test-setup ## Ejecutar solo tests de base de datos
+	@echo "📊 Ejecutando tests de base de datos realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -m database -v
+
+test-concurrency: test-setup ## Ejecutar tests de concurrencia
+	@echo "🚀 Ejecutando tests de concurrencia realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -m concurrency -v
+
+test-integration: test-setup ## Ejecutar tests de integración
+	@echo "🔗 Ejecutando tests de integración realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -m integration -v
+
+test-unit: test-setup ## Ejecutar tests unitarios
+	@echo "🧪 Ejecutando tests unitarios..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) tests/unit/ -v
+
+test-realistic: test-setup ## Ejecutar todos los tests realistas
+	@echo "🎯 Ejecutando TODOS los tests realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) tests/realistic/ -v
+
+test-all: test-setup ## Ejecutar suite completa de tests
+	@echo "🚀 Ejecutando suite COMPLETA de tests realistas..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) \
+		--cov=reservations \
+		--cov=restaurants \
+		--cov-report=html \
+		--cov-report=term \
+		--durations=20 \
+		tests/
+
+test-slow: test-setup ## Ejecutar solo tests lentos
+	@echo "🐌 Ejecutando tests lentos..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -m slow -v
+
+test-ci: ## Tests para CI/CD (sin servicios interactivos)
+	@echo "🤖 Ejecutando tests para CI..."
+	$(DOCKER_COMPOSE_TEST) up -d --wait
+	$(DOCKER_COMPOSE_TEST) exec -T $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) \
+		--junitxml=test-results.xml \
+		--cov=reservations \
+		--cov=restaurants \
+		--cov-report=xml \
+		tests/
+	$(DOCKER_COMPOSE_TEST) down -v
+
+test-debug: test-setup ## Ejecutar tests con debugging habilitado
+	@echo "🐛 Ejecutando tests en modo debug..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) -v -s --pdb --pdbcls=IPython.terminal.debugger:TerminalPdb
+
+test-stress: test-setup ## Ejecutar tests de stress/load
+	@echo "💪 Ejecutando tests de stress..."
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) pytest $(PYTEST_OPTS) \
+		-v \
+		--repeat=10 \
+		tests/realistic/test_redis_locks.py::RedisLockRealisticTest::test_concurrent_reservation_with_real_locks
+
+# Targets de desarrollo
+shell: test-setup ## Abrir shell en contenedor de tests
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) bash
+
+logs: ## Ver logs de servicios
+	$(DOCKER_COMPOSE_TEST) logs -f
+
+logs-celery: ## Ver logs de Celery worker
+	$(DOCKER_COMPOSE_TEST) logs -f test-celery-worker
+
+redis-cli: ## Conectar a Redis CLI
+	$(DOCKER_COMPOSE_TEST) exec test-redis redis-cli
+
+db-shell: ## Conectar a shell de PostgreSQL
+	$(DOCKER_COMPOSE_TEST) exec test-db psql -U test_user -d reservaflow_test
+
+# Limpieza específica
+clean-redis: ## Limpiar datos de Redis
+	$(DOCKER_COMPOSE_TEST) exec test-redis redis-cli FLUSHALL
+
+clean-db: ## Limpiar base de datos
+	$(DOCKER_COMPOSE_TEST) exec test-db psql -U test_user -d reservaflow_test -c "TRUNCATE TABLE reservations_reservation CASCADE;"
+
+# Validación
+validate-services: test-setup ## Validar que todos los servicios funcionan
+	@echo "✅ Validando servicios..."
+	@echo "🔴 Redis:"
+	$(DOCKER_COMPOSE_TEST) exec test-redis redis-cli ping
+	@echo "📊 PostgreSQL:"
+	$(DOCKER_COMPOSE_TEST) exec test-db pg_isready -U test_user -d reservaflow_test
+	@echo "📨 Celery:"
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) celery -A config inspect ping
+	@echo "🌐 Django:"
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) python manage.py check --settings=config.settings_test
+	@echo "✅ Todos los servicios están funcionando"
+
+# Reporting
+test-report: test-all ## Generar reporte completo de tests
+	@echo "📊 Generando reporte de tests..."
+	@echo "Cobertura disponible en htmlcov/index.html"
+	@echo "Resultados JUnit en test-results.xml"
+
+# Desarrollo
+watch-tests: test-setup ## Ejecutar tests en modo watch (reruns on changes)
+	$(DOCKER_COMPOSE_TEST) exec $(TEST_WEB_SERVICE) ptw $(PYTEST_OPTS) tests/

@@ -4,5 +4,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/reservations/", include("reservations.urls")),  # 👈 importante
+    path("", include("reservations.urls")),  # Include reservations API
 ]
