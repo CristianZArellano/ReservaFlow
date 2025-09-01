@@ -16,6 +16,81 @@ from .models import Notification, NotificationTemplate
 
 logger = logging.getLogger(__name__)
 
+
+@shared_task
+def process_notification_queue():
+    """Alias para process_pending_notifications para compatibilidad con tests"""
+    return process_pending_notifications.apply()
+
+
+@shared_task
+def send_bulk_notifications(notification_data_list):
+    """Envía notificaciones en lote - alias para bulk_create_notifications"""
+    results = []
+    for data in notification_data_list:
+        template_code = data.get('template_code')
+        customer_id = data.get('customer_id')
+        context_data = data.get('context_data')
+        scheduled_for = data.get('scheduled_for')
+        
+        result = create_notification_from_template.apply_async(
+            (template_code, customer_id, context_data, scheduled_for)
+        )
+        results.append({
+            'customer_id': customer_id,
+            'task_id': result.id,
+            'template_code': template_code
+        })
+    
+    return {
+        'processed_count': len(results),
+        'results': results,
+        'status': 'queued'
+    }
+
+
+@shared_task
+def generate_notification_report(start_date=None, end_date=None):
+    """Genera reporte de notificaciones para un periodo"""
+    from django.db.models import Count, Q
+    
+    queryset = Notification.objects.all()
+    
+    if start_date:
+        queryset = queryset.filter(created_at__gte=start_date)
+    if end_date:
+        queryset = queryset.filter(created_at__lte=end_date)
+    
+    # Estadísticas por estado
+    status_stats = queryset.aggregate(
+        total=Count('id'),
+        sent=Count('id', filter=Q(status=Notification.Status.SENT)),
+        failed=Count('id', filter=Q(status=Notification.Status.FAILED)),
+        pending=Count('id', filter=Q(status=Notification.Status.PENDING))
+    )
+    
+    # Estadísticas por canal
+    channel_stats = queryset.values('channel').annotate(
+        count=Count('id')
+    ).order_by('channel')
+    
+    # Estadísticas por tipo
+    type_stats = queryset.values('notification_type').annotate(
+        count=Count('id')
+    ).order_by('notification_type')
+    
+    return {
+        'period': {
+            'start_date': start_date.isoformat() if start_date else None,
+            'end_date': end_date.isoformat() if end_date else None
+        },
+        'status_stats': status_stats,
+        'channel_stats': list(channel_stats),
+        'type_stats': list(type_stats),
+        'generated_at': timezone.now().isoformat()
+    }
+
+
 # Definir excepciones específicas para retry
 SMTP_RETRY_EXCEPTIONS = (
     smtplib.SMTPServerDisconnected,

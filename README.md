@@ -1,228 +1,357 @@
-# 🍽️ ReservaFlow
+# 🍽️ ReservaFlow - Sistema de Gestión de Reservas para Restaurantes
 
-**ReservaFlow** is a web application for managing restaurant reservations, built with **Django** and **Django REST Framework**.
+[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://reactjs.org/)
+[![Django](https://img.shields.io/badge/Django-5.2.5-green.svg)](https://djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22.x-green.svg)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docker.com/)
 
-It provides a backend API for handling reservations, customers, and restaurants. The project is configured to use **PostgreSQL** as its database, **Celery** for asynchronous tasks (like sending notifications), and **Redis** as a message broker. The project is also set up for containerization with **Docker** and **Docker Compose**.
+ReservaFlow es un sistema completo de gestión de reservas para restaurantes desarrollado con Django REST Framework en el backend y React con Material-UI en el frontend. El sistema permite la gestión integral de restaurantes, clientes, reservas y notificaciones con una interfaz moderna y responsiva.
 
-## 🚀 Features
+## 📸 Capturas de Pantalla
 
-*   **Online Reservation Management:** Manage your restaurant's reservations digitally.
-*   **User Authentication:** Allows customers to register and log in securely.
-*   **Restaurant Management:** Manage information about your establishments and tables.
-*   **Admin Panel:** Use the Django Admin panel for centralized management.
-*   **Notifications:** Send email notifications (configurable with Celery + Redis).
-*   **Deployment:** Ready for production with **Docker** and **docker-compose**.
+### Dashboard Principal
+![Dashboard](docs/screenshots/dashboard-main.png)
+*Vista principal con estadísticas y acciones rápidas*
 
-## 🛠️ Technologies Used
+### Gestión de Restaurantes
+![Restaurantes](docs/screenshots/restaurants-list.png)
+*Lista completa de restaurantes con filtros y acciones*
 
-*   [Python 3.12+](https://www.python.org/)
-*   [Django 5](https://www.djangoproject.com/)
-*   [Django REST Framework (DRF)](https://www.django-rest-framework.org/)
-*   [Celery](https://docs.celeryq.dev/) and [Redis](https://redis.io/) for background tasks
-*   [PostgreSQL](https://www.postgresql.org/) as the main database
-*   [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
-*   [uv](https://github.com/astral-sh/uv) for dependency management
+### Gestión de Clientes
+![Clientes](docs/screenshots/customers-list.png)
+*Sistema de gestión de clientes con información detallada*
 
-## 📦 Local Development Setup
+### Gestión de Reservas
+![Reservas](docs/screenshots/reservations-list.png)
+*Panel de control de reservas con filtros avanzados*
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/CristianZArellano/ReservaFlow.git
-    cd ReservaFlow/restaurant-reservations
-    ```
+### Formulario de Nueva Reserva
+![Nueva Reserva](docs/screenshots/create-reservation-form.png)
+*Flujo intuitivo de creación de reservas paso a paso*
 
-2.  **Install dependencies:**
-    ```bash
-    uv sync
-    ```
+### Sistema de Notificaciones
+![Notificaciones](docs/screenshots/notifications-list.png)
+*Centro de control de notificaciones y comunicaciones*
 
-3.  **Activate the virtual environment:**
-    ```bash
-    source .venv/bin/activate  # Linux/Mac
-    .venv\Scripts\activate     # Windows
-    ```
+## 🌟 Características Principales
 
-4.  **Create the `.env` file:**
-    In the `restaurant-reservations` directory, create a `.env` file with the following content:
-    ```env
-    SECRET_KEY=your_secret_key
-    DEBUG=True
-    DATABASE_URL=postgres://user:password@localhost:5432/reservaflow
-    REDIS_URL=redis://localhost:6379/0
-    ```
+### 🏢 Backend (Django REST Framework)
+- **API REST completa** con endpoints para todas las entidades
+- **Sistema de reservas** con prevención de doble reserva
+- **Gestión de restaurantes y mesas** con disponibilidad en tiempo real  
+- **Sistema de notificaciones** con Celery y Redis
+- **Autenticación y autorización** configurable
+- **Base de datos PostgreSQL** con migraciones automáticas
+- **Documentación automática** con Django REST Framework
+- **Tests exhaustivos** con pytest y Django TestCase
 
-5.  **Run database migrations and create a superuser:**
-    ```bash
-    uv run python manage.py migrate
-    uv run python manage.py createsuperuser
-    ```
+### 🖥️ Frontend (React + Material-UI)
+- **Interfaz responsiva** con Material-UI Design System
+- **Dashboard interactivo** con estadísticas en tiempo real
+- **CRUD completo** para todas las entidades
+- **Gestión de reservas** con flujo de múltiples pasos
+- **Sistema de notificaciones** integrado
+- **React Query** para gestión de estado y cacheo
+- **Routing dinámico** con React Router
+- **Tests automatizados** con Jest y Testing Library
 
-6.  **Start the development server:**
-    ```bash
-    uv run python manage.py runserver
-    ```
+### 🔧 Infraestructura
+- **Docker Compose** para desarrollo local
+- **PostgreSQL** como base de datos principal
+- **Redis** para cache y broker de Celery
+- **Celery** para tareas asíncronas
+- **Nginx** ready para producción
 
-## 🐳 Docker Deployment
+## 🚀 Inicio Rápido
 
-To run the application using Docker, execute the following command from the `restaurant-reservations` directory:
+### Prerrequisitos
+- Docker y Docker Compose
+- Node.js 18+ y npm
+- Git
 
+### 1. Clonar el Repositorio
 ```bash
-docker-compose up --build
+git clone https://github.com/tu-usuario/ReservaFlow.git
+cd ReservaFlow
 ```
 
-This will start the Django application, PostgreSQL database, Redis server, and Celery workers.
+### 2. Configurar Variables de Entorno
+```bash
+# Backend
+cp restaurant-reservations/.env.example restaurant-reservations/.env
+# Editar las variables según sea necesario
+```
 
-## 🔬 Development Conventions
+### 3. Iniciar el Backend
+```bash
+cd restaurant-reservations
+docker-compose up -d --build
+```
 
-*   **Dependency Management:** Project dependencies are managed with `uv` and are listed in the `pyproject.toml` file.
-*   **Code Style:** The project uses `ruff` for linting and formatting.
-    *   `ruff check .` (lint)
-    *   `ruff format .` (format)
-*   **Testing:** The project is set up to use `pytest` for testing.
-    *   `pytest`
+### 4. Iniciar el Frontend
+```bash
+cd FrontendReact
+npm install
+npm start
+```
 
-## 📂 Project Structure
+### 5. Acceder a la Aplicación
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **Admin Django**: http://localhost:8000/admin
 
-The project is organized into the following directories inside `restaurant-reservations`:
+## 📁 Estructura del Proyecto
 
-*   `config/`: Project-level configuration, including `settings.py` and `urls.py`.
-*   `customers/`: Django app for managing customer information.
-*   `notifications/`: Django app for handling notifications.
-*   `reservations/`: Django app for managing reservations.
-*   `restaurants/`: Django app for managing restaurant information and tables.
+```
+ReservaFlow/
+├── 📂 restaurant-reservations/          # Backend Django
+│   ├── 📂 config/                      # Configuración del proyecto
+│   ├── 📂 restaurants/                 # App de restaurantes y mesas
+│   ├── 📂 customers/                   # App de clientes
+│   ├── 📂 reservations/                # App de reservas
+│   ├── 📂 notifications/               # App de notificaciones
+│   ├── 📂 tests/                       # Tests del backend
+│   ├── 📄 docker-compose.yml           # Configuración Docker
+│   ├── 📄 requirements.txt             # Dependencias Python
+│   └── 📄 manage.py                    # Django management
+│
+├── 📂 FrontendReact/                   # Frontend React
+│   ├── 📂 src/
+│   │   ├── 📂 components/              # Componentes reutilizables
+│   │   ├── 📂 pages/                   # Páginas principales
+│   │   ├── 📂 services/                # API services
+│   │   ├── 📄 App.js                   # Componente principal
+│   │   └── 📄 index.js                 # Punto de entrada
+│   ├── 📂 public/                      # Archivos públicos
+│   ├── 📄 package.json                 # Dependencias Node.js
+│   └── 📄 README.md                    # Documentación frontend
+│
+├── 📂 scripts/                         # Scripts de automatización
+├── 📂 docs/                           # Documentación adicional
+├── 📄 README.md                       # Este archivo
+└── 📄 CLAUDE.md                       # Instrucciones para Claude Code
+```
 
-### Data Models
+## 🔧 Comandos de Desarrollo
 
-*   **Customer:** Represents a customer with basic contact information and reservation statistics.
-*   **Restaurant:** Represents a restaurant with details about its operation, and includes a `Table` model for managing tables and an `Image` model for storing images.
-*   **Reservation:** Represents a reservation made by a customer for a specific restaurant and table. It includes the reservation date, time, party size, and status.
-*   **Notification:** This model is not yet defined.
+### Backend Django
+```bash
+cd restaurant-reservations
 
-## Architecture and Design
+# Iniciar servicios
+docker-compose up -d
 
-ReservaFlow is built with a modular architecture, typical of Django projects. Here are some key design decisions:
+# Ver logs
+docker-compose logs -f web
 
-### Asynchronous Task Handling with Celery
+# Ejecutar migraciones
+docker-compose exec web python manage.py migrate
 
-The application uses Celery to handle long-running or periodic tasks in the background, ensuring the user-facing API remains fast and responsive. The main tasks are:
+# Crear superusuario
+docker-compose exec web python manage.py createsuperuser
 
-*   **Reservation Expiration (`expire_reservation`):** When a reservation is created, it has a `pending` status and an expiration time. A Celery task is scheduled to run at the expiration time. If the reservation hasn't been confirmed by then, the task updates its status to `expired`.
-*   **Email Notifications (`send_confirmation_email`, `send_reminder`):** Celery is used to send emails asynchronously. This includes confirmation emails when a reservation is made and reminder emails sent 24 hours before the reservation time.
+# Ejecutar tests
+docker-compose exec web uv run pytest -v
 
-### Preventing Double Bookings with a Distributed Lock
+# Acceder al shell de Django
+docker-compose exec web python manage.py shell
 
-To handle concurrent requests and prevent the same table from being booked at the same time by different users, the system implements a distributed lock using Redis.
+# Parar servicios
+docker-compose down
+```
 
-*   **`TableReservationLock`:** This service creates a unique lock in Redis for a specific table and time slot. When a user tries to book a table, the system attempts to acquire this lock.
-*   If the lock is already held by another request, the system returns a `423 Locked` error, indicating that the resource is temporarily unavailable.
-*   Once the reservation is created (or fails), the lock is released, allowing other users to book that table.
+### Frontend React
+```bash
+cd FrontendReact
 
-### Caching for Performance
+# Instalar dependencias
+npm install
 
-The system uses Django's caching framework (configured with Redis) to improve performance when checking table availability.
+# Iniciar servidor de desarrollo
+npm start
 
-*   **`check_table_availability`:** This function first checks the cache to see if the availability for a specific table and time has been recently queried. If so, it returns the cached result. Otherwise, it queries the database and caches the result for future requests.
+# Ejecutar tests
+npm test
 
-## API Reference
+# Build para producción
+npm run build
 
-The API is available under the `/api/` prefix.
+# Linting
+npm run lint (si está configurado)
+```
 
-### Reservation Endpoints
+## 🧪 Testing
 
-*   **Endpoint:** `/api/reservations/`
-*   **Model:** `Reservation`
-*   **ViewSet:** `ReservationViewSet`
+### Backend Tests
+```bash
+cd restaurant-reservations
 
-#### List Reservations
+# Todos los tests
+docker-compose exec web uv run pytest -v
 
-*   **Method:** `GET`
-*   **URL:** `/api/reservations/`
-*   **Description:** Retrieves a list of all reservations.
-*   **Success Response (200 OK):**
-    ```json
-    [
-        {
-            "id": "uuid-of-reservation",
-            "status": "confirmed",
-            "reservation_date": "YYYY-MM-DD",
-            "reservation_time": "HH:MM:SS"
-        }
-    ]
-    ```
+# Tests específicos
+docker-compose exec web uv run pytest tests/unit/ -v
+docker-compose exec web uv run pytest tests/integration/ -v
 
-#### Retrieve a Reservation
+# Tests con cobertura
+docker-compose exec web uv run pytest --cov=. --cov-report=html
+```
 
-*   **Method:** `GET`
-*   **URL:** `/api/reservations/{id}/`
-*   **Description:** Retrieves a specific reservation by its ID.
-*   **Success Response (200 OK):**
-    ```json
-    {
-        "id": "uuid-of-reservation",
-        "status": "pending",
-        "expires_at": "YYYY-MM-DDTHH:MM:SSZ"
-    }
-    ```
-*   **Error Response (404 Not Found):**
-    ```json
-    {
-        "error": "Reserva no encontrada"
-    }
-    ```
+### Frontend Tests
+```bash
+cd FrontendReact
 
-#### Create a Reservation
+# Ejecutar todos los tests
+npm test -- --watchAll=false
 
-*   **Method:** `POST`
-*   **URL:** `/api/reservations/`
-*   **Description:** Creates a new reservation for a table. This endpoint uses a distributed lock to prevent double bookings.
-*   **Body (JSON):**
-    ```json
-    {
-        "restaurant_id": 1,
-        "customer_id": 1,
-        "table_id": 1,
-        "reservation_date": "YYYY-MM-DD",
-        "reservation_time": "HH:MM:SS",
-        "party_size": 2
-    }
-    ```
-*   **Success Response (201 Created):**
-    ```json
-    {
-        "id": "new-uuid-of-reservation",
-        "status": "pending",
-        "expires_at": "YYYY-MM-DDTHH:MM:SSZ",
-        "message": "Reserva creada exitosamente"
-    }
-    ```
-*   **Error Responses:**
-    *   **400 Bad Request:** If required fields are missing.
-        ```json
-        {
-            "error": "Faltan campos requeridos"
-        }
-        ```
-    *   **409 Conflict:** If the table is not available.
-        ```json
-        {
-            "error": "Mesa no disponible en esa fecha/hora"
-        }
-        ```
-    *   **423 Locked:** If another user is currently trying to book the same table.
-        ```json
-        {
-            "error": "Mesa está siendo reservada: Mesa ya está siendo reservada por otro cliente"
-        }
-        ```
+# Tests con cobertura
+npm test -- --coverage --watchAll=false
 
-## 👨‍💻 Author
+# Tests en modo watch
+npm test
+```
 
-Project developed by **Cristian Z. Arellano**
+## 🌐 API Endpoints
 
-*   **GitHub:** [CristianZArellano](https://github.com/CristianZArellano)
+### Principales Endpoints
+- **Restaurantes**: `GET|POST /api/restaurants/restaurants/`
+- **Mesas**: `GET|POST /api/restaurants/tables/`
+- **Clientes**: `GET|POST /api/customers/`
+- **Reservas**: `GET|POST /api/reservations/`
+- **Notificaciones**: `GET|POST /api/notifications/notifications/`
 
-## 📜 License
+### Documentación API
+- **Swagger**: http://localhost:8000/swagger/
+- **ReDoc**: http://localhost:8000/redoc/
 
-This project is under the **MIT** license. You can use, modify, and distribute it freely.
+## 🎨 Tema y Colores
 
-✨ Happy coding!
+El frontend utiliza una paleta de colores personalizada:
+- **Melon**: #ffa69e (Primario)
+- **Eggshell**: #faf3dd (Fondo claro)
+- **Celeste**: #b8f2e6 (Secundario)
+- **Light Blue**: #aed9e0 (Terciario)
+- **Paynes Gray**: #5e6472 (Texto)
+
+## 🔐 Configuración de Seguridad
+
+### Desarrollo
+- Las APIs están configuradas con `AllowAny` para desarrollo
+- CORS habilitado para localhost:3000
+- Debug mode activado
+
+### Producción
+Actualizar la configuración en `restaurant-reservations/config/settings.py`:
+```python
+DEBUG = False
+ALLOWED_HOSTS = ['tu-dominio.com']
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = ['https://tu-frontend.com']
+```
+
+## 📦 Dependencias Principales
+
+### Backend
+- **Django 5.2.5**: Framework web
+- **Django REST Framework**: API REST
+- **PostgreSQL**: Base de datos
+- **Redis**: Cache y broker
+- **Celery**: Tareas asíncronas
+- **pytest**: Testing
+- **uv**: Gestión de dependencias
+
+### Frontend
+- **React 18.2.0**: Biblioteca de UI
+- **Material-UI 5.15.0**: Design system
+- **React Query 3.39.3**: Estado y cacheo
+- **React Router 6.20.1**: Routing
+- **Axios 1.6.2**: Cliente HTTP
+- **date-fns**: Manejo de fechas
+
+## 🚀 Despliegue
+
+### Docker Production
+```bash
+# Build para producción
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+### Configuraciones de Entorno
+- **Desarrollo**: Docker Compose local
+- **Testing**: GitHub Actions / CI/CD
+- **Producción**: Docker Swarm / Kubernetes
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear rama feature (`git checkout -b feature/nueva-caracteristica`)
+3. Commit cambios (`git commit -m 'Agregar nueva característica'`)
+4. Push a la rama (`git push origin feature/nueva-caracteristica`)
+5. Abrir Pull Request
+
+## 📈 Monitoreo y Logs
+
+### Logs de Aplicación
+```bash
+# Backend logs
+docker-compose logs -f web
+
+# Celery logs
+docker-compose logs -f celery-worker
+
+# Database logs
+docker-compose logs -f db
+```
+
+### Métricas de Celery
+- Disponibles en: http://localhost:8000/api/monitoring/celery/health/
+- Dashboard de tareas en desarrollo
+
+## 🐛 Troubleshooting
+
+### Problemas Comunes
+
+**Puerto ocupado**:
+```bash
+# Cambiar puertos en docker-compose.yml
+ports:
+  - "8001:8000"  # En lugar de 8000:8000
+```
+
+**Base de datos no conecta**:
+```bash
+# Reiniciar servicios
+docker-compose down
+docker-compose up -d
+```
+
+**Frontend no carga**:
+```bash
+# Limpiar cache y reinstalar
+rm -rf node_modules package-lock.json
+npm install
+npm start
+```
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 👥 Equipo
+
+- **Desarrollo**: Claude Code Assistant
+- **Arquitectura**: Full Stack Django + React
+- **Infraestructura**: Docker + PostgreSQL + Redis
+
+## 📞 Soporte
+
+- **Issues**: GitHub Issues
+- **Documentación**: `/docs` directorio
+- **API Docs**: http://localhost:8000/swagger/
+
+---
+
+⭐ **¡Dale una estrella si te gusta el proyecto!**
+
+Desarrollado con ❤️ usando Django, React, y las mejores prácticas de desarrollo moderno.

@@ -16,6 +16,20 @@ from django.utils import timezone
 logger = logging.getLogger("celery.monitoring")
 
 
+class TaskMetrics:
+    """Clase para métricas de tareas Celery"""
+    
+    @staticmethod
+    def get_task_stats(task_name: str = None) -> Dict[str, Any]:
+        """Obtiene estadísticas de tareas"""
+        return TaskMonitor.get_task_stats(task_name)
+    
+    @staticmethod
+    def reset_stats() -> None:
+        """Resetea todas las estadísticas"""
+        return TaskMonitor.reset_stats()
+
+
 class TaskMonitor:
     """Monitor para tareas de Celery con métricas y alertas"""
 

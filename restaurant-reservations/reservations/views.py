@@ -35,10 +35,8 @@ class ReservationViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         """Permisos según acción"""
-        if self.action in ["list", "retrieve"]:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        # Allow all actions for development
+        permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
     def list(self, request):

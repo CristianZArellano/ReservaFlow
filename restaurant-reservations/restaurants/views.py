@@ -67,10 +67,8 @@ class RestaurantViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Set permissions based on action"""
-        if self.action in ["list", "retrieve", "search", "available_tables", "stats"]:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        # Allow all actions for development
+        permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
@@ -347,10 +345,8 @@ class TableViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Set permissions based on action"""
-        if self.action in ["list", "retrieve"]:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        # Allow all actions for development
+        permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):

@@ -72,10 +72,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Set permissions based on action"""
-        if self.action in ["list", "retrieve", "stats"]:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        # Allow all actions for development
+        permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
@@ -368,7 +366,7 @@ class NotificationTemplateViewSet(viewsets.ModelViewSet):
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @action(detail=True, methods=["post"])
     def render(self, request, pk=None):
@@ -438,7 +436,7 @@ class NotificationPreferenceViewSet(viewsets.ModelViewSet):
     filterset_fields = ["customer", "email_enabled", "sms_enabled", "push_enabled"]
 
     filter_backends = [DjangoFilterBackend]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         """Filter by customer if specified"""
